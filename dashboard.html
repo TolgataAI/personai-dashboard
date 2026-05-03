@@ -771,6 +771,78 @@ body {
 .drawer-title { flex: 1; font-size: 16px; font-weight: 600; }
 .drawer-body { flex: 1; overflow-y: auto; padding: 8px 16px; }
 
+/* Artifact form (second level panel) */
+.drawer-form-panel {
+  position: absolute; inset: 0;
+  background: var(--bg);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.drawer-form-panel.open { transform: translateX(0); }
+
+/* Form fields */
+.form-field { margin-bottom: 16px; }
+.form-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+.form-input {
+  width: 100%; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 12px;
+  font-family: var(--font); font-size: 14px; color: var(--text);
+  outline: none; transition: border-color 0.2s; box-sizing: border-box;
+}
+.form-input:focus { border-color: var(--accent); }
+.form-textarea {
+  width: 100%; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 12px;
+  font-family: var(--font); font-size: 14px; color: var(--text);
+  outline: none; resize: none; line-height: 1.6;
+  transition: border-color 0.2s; box-sizing: border-box;
+}
+.form-textarea:focus { border-color: var(--accent); }
+.form-input::placeholder, .form-textarea::placeholder { color: var(--text3); }
+
+/* Upload/record option cards */
+.upload-option-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px;
+  cursor: pointer; margin-bottom: 10px; transition: all 0.15s;
+}
+.upload-option-card:active { background: var(--surface2); }
+.upload-option-card.selected { border-color: var(--accent); background: rgba(91,142,240,0.05); }
+.upload-option-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.upload-option-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.upload-option-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* Upload drop zone */
+.upload-drop-zone {
+  background: var(--surface2); border: 2px dashed var(--border2);
+  border-radius: var(--radius-sm); padding: 28px 16px;
+  text-align: center; cursor: pointer;
+  font-size: 13px; color: var(--text3); line-height: 1.6;
+  transition: all 0.15s; margin-top: 4px;
+}
+.upload-drop-zone:active { background: var(--surface3); }
+
+/* Record UI */
+.record-ui {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 20px 0; gap: 10px; margin-top: 4px;
+}
+.record-mic-btn {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--accent); border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s;
+  box-shadow: 0 4px 16px rgba(91,142,240,0.35);
+}
+.record-mic-btn.recording { background: var(--danger); box-shadow: 0 4px 16px rgba(239,68,68,0.4); animation: rec-pulse 1.5s infinite; }
+@keyframes rec-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+.record-mic-btn svg { width: 28px; height: 28px; }
+.record-timer { font-size: 24px; font-weight: 600; font-family: var(--mono); color: var(--text); }
+.record-hint { font-size: 12px; color: var(--text3); }
+
 /* Artifact type list */
 .artifact-type-list { display: flex; flex-direction: column; }
 .artifact-type-item {
@@ -1608,6 +1680,19 @@ body {
         </div>
       </div>
     </div>
+
+    <!-- Form panel: slides over type list when type is selected -->
+    <div class="drawer-form-panel" id="drawer-form-panel">
+      <div class="drawer-header">
+        <button class="back-btn" onclick="closeArtifactForm()">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="drawer-title" id="drawer-form-title"></div>
+        <div style="width:34px"></div>
+      </div>
+      <div class="drawer-body" id="drawer-form-body"></div>
+    </div>
+
   </div>
 </div>
 
@@ -1980,6 +2065,7 @@ function openArtifactDrawer() {
 
 function closeArtifactDrawer() {
   document.getElementById('artifact-drawer').classList.remove('open');
+  closeArtifactForm();
 }
 
 function toggleAccountMenu() {
@@ -1999,7 +2085,163 @@ document.addEventListener('click', function(e) {
 });
 
 function selectArtifactType(el) {
+  const name = el.querySelector('.artifact-type-name').textContent;
+  if (name === 'WhatsApp Chat' || name === 'Instagram Chat') {
+    closeArtifactDrawer();
+    return;
+  }
+  openArtifactForm(name);
+}
+
+function openArtifactForm(typeName) {
+  document.getElementById('drawer-form-title').textContent = 'Add ' + typeName;
+  document.getElementById('drawer-form-body').innerHTML = buildFormHTML(typeName);
+  document.getElementById('drawer-form-panel').classList.add('open');
+}
+
+function closeArtifactForm() {
+  document.getElementById('drawer-form-panel').classList.remove('open');
+  clearInterval(recTimerInterval);
+  recTimerInterval = null;
+  recActive = false;
+}
+
+function saveArtifactForm() {
+  closeArtifactForm();
   closeArtifactDrawer();
+}
+
+function showSourceOption(type) {
+  document.querySelectorAll('#drawer-form-body .upload-option-card').forEach(c => c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  const up = document.getElementById('upload-area');
+  const rec = document.getElementById('record-area');
+  if (up) up.style.display = type === 'upload' ? 'block' : 'none';
+  if (rec) rec.style.display = type === 'record' ? 'block' : 'none';
+}
+
+let recTimerInterval = null;
+let recSeconds = 0;
+let recActive = false;
+
+function toggleRecording() {
+  recActive = !recActive;
+  const btn = document.getElementById('rec-btn');
+  const timer = document.getElementById('rec-timer');
+  const hint = document.getElementById('rec-hint');
+  if (recActive) {
+    btn.classList.add('recording');
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="white" stroke="none"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>`;
+    if (hint) hint.textContent = 'Tap to stop';
+    recSeconds = 0;
+    recTimerInterval = setInterval(() => {
+      recSeconds++;
+      const m = Math.floor(recSeconds / 60);
+      const s = recSeconds % 60;
+      if (timer) timer.textContent = m + ':' + String(s).padStart(2, '0');
+    }, 1000);
+  } else {
+    btn.classList.remove('recording');
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`;
+    if (hint) hint.textContent = 'Recording saved — tap to re-record';
+    clearInterval(recTimerInterval);
+  }
+}
+
+function buildFormHTML(typeName) {
+  const titleField = `<div class="form-field"><div class="form-label">Title</div><input class="form-input" placeholder="Give this artifact a title..."></div>`;
+
+  if (typeName === 'Note') {
+    return titleField + `
+      <div class="form-field">
+        <div class="form-label">Content</div>
+        <textarea class="form-textarea" rows="9" placeholder="Write your note here..."></textarea>
+      </div>
+      <button class="add-btn" onclick="saveArtifactForm()">Save Note</button>`;
+  }
+
+  if (typeName === 'Voice') {
+    return titleField + `
+      <div class="form-field">
+        <div class="form-label">Audio Source</div>
+        <div class="upload-option-card" onclick="showSourceOption('upload')">
+          <div class="upload-option-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5B8EF0" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+          <div><div class="upload-option-name">Upload File</div><div class="upload-option-sub">MP3, M4A, WAV</div></div>
+        </div>
+        <div class="upload-option-card" onclick="showSourceOption('record')">
+          <div class="upload-option-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg></div>
+          <div><div class="upload-option-name">Record Audio</div><div class="upload-option-sub">Use your microphone</div></div>
+        </div>
+        <div id="upload-area" style="display:none">
+          <div class="upload-drop-zone"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 8px;display:block"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Tap to select audio file</div>
+        </div>
+        <div id="record-area" style="display:none">
+          <div class="record-ui">
+            <button class="record-mic-btn" id="rec-btn" onclick="toggleRecording()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </button>
+            <div class="record-timer" id="rec-timer">0:00</div>
+            <div class="record-hint" id="rec-hint">Tap to start recording</div>
+          </div>
+        </div>
+      </div>
+      <button class="add-btn" onclick="saveArtifactForm()">Save Voice</button>`;
+  }
+
+  if (typeName === 'Video') {
+    return titleField + `
+      <div class="form-field">
+        <div class="form-label">Video Source</div>
+        <div class="upload-option-card" onclick="showSourceOption('upload')">
+          <div class="upload-option-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5B8EF0" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+          <div><div class="upload-option-name">Upload File</div><div class="upload-option-sub">MP4, MOV</div></div>
+        </div>
+        <div class="upload-option-card" onclick="showSourceOption('record')">
+          <div class="upload-option-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></div>
+          <div><div class="upload-option-name">Record Video</div><div class="upload-option-sub">Use your camera</div></div>
+        </div>
+        <div id="upload-area" style="display:none">
+          <div class="upload-drop-zone"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 8px;display:block"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Tap to select video file</div>
+        </div>
+        <div id="record-area" style="display:none">
+          <div class="record-ui">
+            <button class="record-mic-btn" id="rec-btn" onclick="toggleRecording()" style="background:var(--danger);box-shadow:0 4px 16px rgba(239,68,68,0.35)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            </button>
+            <div class="record-timer" id="rec-timer">0:00</div>
+            <div class="record-hint" id="rec-hint">Tap to start recording</div>
+          </div>
+        </div>
+      </div>
+      <button class="add-btn" onclick="saveArtifactForm()">Save Video</button>`;
+  }
+
+  if (typeName === 'Document') {
+    return titleField + `
+      <div class="form-field">
+        <div class="form-label">File</div>
+        <div class="upload-drop-zone">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 8px;display:block"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Tap to select a document<br><span style="font-size:11px">PDF, Word, TXT</span>
+        </div>
+      </div>
+      <button class="add-btn" onclick="saveArtifactForm()">Save Document</button>`;
+  }
+
+  if (typeName === 'FAQ') {
+    return titleField + `
+      <div class="form-field">
+        <div class="form-label">Question</div>
+        <textarea class="form-textarea" rows="3" placeholder="What question do your customers ask?"></textarea>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Answer</div>
+        <textarea class="form-textarea" rows="5" placeholder="Your answer..."></textarea>
+      </div>
+      <button class="add-btn" onclick="saveArtifactForm()">Save FAQ</button>`;
+  }
+
+  return titleField + `<button class="add-btn" onclick="saveArtifactForm()">Save</button>`;
 }
 
 function filterThreads(filter, el) {
