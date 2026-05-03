@@ -34,6 +34,11 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 body {
+  background: var(--surface3);
+  margin: 0; padding: 0;
+}
+
+#app {
   font-family: var(--font);
   background: var(--bg);
   color: var(--text);
@@ -76,7 +81,7 @@ body {
 
 /* Account dropdown menu */
 .account-menu {
-  position: fixed; top: 56px; right: 20px;
+  position: absolute; top: 56px; right: 20px;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius-sm); box-shadow: var(--shadow);
   min-width: 160px; z-index: 50; overflow: hidden;
@@ -349,11 +354,10 @@ body {
 
 /* ====== INBOX DETAIL ====== */
 .inbox-detail {
-  position: fixed; inset: 0; background: var(--bg);
+  position: absolute; inset: 0; background: var(--bg);
   z-index: 100; display: flex; flex-direction: column;
   transform: translateX(100%);
   transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-  max-width: 430px; margin: 0 auto;
 }
 .inbox-detail.open { transform: translateX(0); }
 .detail-header {
@@ -738,9 +742,8 @@ body {
 
 /* Artifact drawer */
 .artifact-drawer {
-  position: fixed; inset: 0;
+  position: absolute; inset: 0;
   z-index: 200;
-  max-width: 430px; margin: 0 auto;
   pointer-events: none;
 }
 .artifact-drawer.open { pointer-events: all; }
@@ -822,6 +825,8 @@ body {
 </style>
 </head>
 <body>
+
+<div id="app">
 
 <!-- TOP BAR -->
 <div class="topbar" style="position:relative">
@@ -2120,5 +2125,7 @@ function togglePQSub(id) {
   chev.classList.toggle('open');
 }
 </script>
+
+</div><!-- /#app -->
 </body>
 </html>
