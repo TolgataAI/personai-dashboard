@@ -815,12 +815,11 @@ body {
 .sub-collapsible { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1); }
 .sub-collapsible.open { max-height: 3000px; }
 .pq-item {
-  display: flex; gap: 10px;
   padding: 12px 0; border-bottom: 1px solid var(--border);
 }
 .pq-item:last-of-type { border-bottom: none; }
-.pq-num { font-size: 11px; font-weight: 700; color: var(--text3); min-width: 18px; padding-top: 3px; }
-.pq-body { flex: 1; }
+.pq-num { display: none; }
+.pq-body { width: 100%; }
 .pq-question { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 7px; line-height: 1.5; }
 </style>
 </head>
