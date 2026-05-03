@@ -1,0 +1,2022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PersonaAI Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F5F7FA;
+  --surface: #FFFFFF;
+  --surface2: #EEF1F6;
+  --surface3: #E4E8F0;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.13);
+  --accent: #5B8EF0;
+  --accent2: #8B5CF6;
+  --accent3: #10B981;
+  --accent4: #F59E0B;
+  --text: #0C0F14;
+  --text2: #505A6E;
+  --text3: #8892A4;
+  --danger: #EF4444;
+  --font: 'Sora', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --nav-h: 64px;
+  --safe-bottom: env(safe-area-inset-bottom, 16px);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* TOP BAR */
+.topbar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  z-index: 10;
+}
+.topbar-logo {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.topbar-logo-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent3);
+  box-shadow: 0 0 6px var(--accent3);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.topbar-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  color: white;
+  cursor: pointer;
+}
+
+/* PAGES */
+.pages { flex: 1; overflow: hidden; position: relative; }
+.page {
+  position: absolute; inset: 0;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 20px 20px calc(var(--nav-h) + 20px + var(--safe-bottom));
+  display: none;
+  -webkit-overflow-scrolling: touch;
+}
+.page.active { display: block; }
+
+/* BOTTOM NAV */
+.nav {
+  height: var(--nav-h);
+  padding-bottom: var(--safe-bottom);
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  z-index: 10;
+}
+.nav-item {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+  cursor: pointer; padding: 8px 4px;
+  transition: all 0.2s; position: relative;
+}
+.nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; position: relative; }
+.nav-icon svg { width: 22px; height: 22px; }
+.nav-label { font-size: 10px; font-weight: 500; color: var(--text3); transition: color 0.2s; letter-spacing: 0.3px; }
+.nav-item.active .nav-label { color: var(--accent); }
+.nav-item.active .nav-icon svg { stroke: var(--accent); }
+.nav-item:not(.active) .nav-icon svg { stroke: var(--text3); }
+.nav-badge {
+  position: absolute; top: -2px; right: -4px;
+  min-width: 16px; height: 16px;
+  background: var(--danger); border-radius: 8px;
+  font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  color: white; padding: 0 4px;
+}
+
+/* SHARED */
+.section-header { margin-bottom: 20px; }
+.section-title { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 4px; }
+.section-sub { font-size: 13px; color: var(--text2); }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px; margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.card-label {
+  font-size: 11px; font-weight: 600;
+  color: var(--text3); text-transform: uppercase;
+  letter-spacing: 0.8px; margin-bottom: 12px;
+}
+
+/* ====== PROFILE ====== */
+.persona-card {
+  background: linear-gradient(135deg, rgba(91,142,240,0.07), rgba(139,92,246,0.07));
+  border: 1px solid rgba(91,142,240,0.18);
+  border-radius: var(--radius);
+  padding: 20px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.persona-avatar {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.persona-name { font-size: 17px; font-weight: 600; margin-bottom: 2px; }
+.persona-role { font-size: 12px; color: var(--text2); margin-bottom: 10px; }
+.persona-strength { display: flex; align-items: center; gap: 8px; }
+.strength-bar { flex: 1; height: 5px; background: rgba(91,142,240,0.15); border-radius: 3px; overflow: hidden; }
+.strength-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 3px; width: 68%; }
+.strength-label { font-size: 11px; color: var(--accent); font-weight: 600; white-space: nowrap; }
+
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px 12px;
+  text-align: center; box-shadow: var(--shadow-sm);
+}
+.stat-num { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+.stat-label { font-size: 10px; color: var(--text3); font-weight: 500; letter-spacing: 0.3px; }
+
+.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.upload-btn {
+  background: var(--surface2); border: 1.5px dashed var(--border2);
+  border-radius: var(--radius-sm); padding: 16px 12px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; cursor: pointer; transition: all 0.2s; text-align: center;
+}
+.upload-btn:active { transform: scale(0.97); background: var(--surface3); }
+.upload-btn-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.upload-btn-icon svg { width: 18px; height: 18px; }
+.upload-btn-label { font-size: 12px; font-weight: 600; color: var(--text); }
+.upload-btn-sub { font-size: 10px; color: var(--text3); }
+
+.faq-field {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 8px;
+  transition: border-color 0.2s;
+}
+.faq-field:focus-within { border-color: var(--accent); }
+.faq-field-label { font-size: 10px; color: var(--text3); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+.faq-input {
+  width: 100%; background: transparent; border: none; outline: none;
+  color: var(--text); font-family: var(--font); font-size: 14px;
+  resize: none; min-height: 38px;
+}
+.faq-input::placeholder { color: var(--text3); }
+
+.add-btn {
+  width: 100%; background: var(--accent); border: none;
+  border-radius: var(--radius-sm); padding: 14px;
+  color: white; font-family: var(--font); font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 10px;
+}
+.add-btn:active { transform: scale(0.98); opacity: 0.9; }
+
+/* Pipeline */
+.pipeline { display: flex; align-items: flex-start; padding: 8px 0 4px; }
+.pipe-step {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  flex: 1; position: relative;
+}
+.pipe-step:not(:last-child)::after {
+  content: ''; position: absolute; right: 0; top: 10px;
+  width: 50%; height: 2px; background: var(--border);
+}
+.pipe-step:not(:first-child)::before {
+  content: ''; position: absolute; left: 0; top: 10px;
+  width: 50%; height: 2px; background: var(--border);
+}
+.pipe-step.done::after, .pipe-step.done::before,
+.pipe-step.active::before { background: var(--accent3); }
+.pipe-dot {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--surface3); border: 2px solid var(--border2);
+  display: flex; align-items: center; justify-content: center; position: relative; z-index: 1;
+}
+.pipe-step.done .pipe-dot { background: var(--accent3); border-color: var(--accent3); }
+.pipe-step.active .pipe-dot { background: var(--accent); border-color: var(--accent); animation: pipe-pulse 1.5s infinite; }
+@keyframes pipe-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(91,142,240,0.4)} 50%{box-shadow:0 0 0 5px rgba(91,142,240,0)} }
+.pipe-dot svg { width: 10px; height: 10px; stroke: white; stroke-width: 2.5; fill: none; }
+.pipe-label { font-size: 9px; color: var(--text3); font-weight: 500; text-align: center; line-height: 1.3; }
+.pipe-step.done .pipe-label { color: var(--accent3); }
+.pipe-step.active .pipe-label { color: var(--accent); font-weight: 600; }
+
+.artifact-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.artifact-item:last-child { border-bottom: none; }
+.artifact-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 17px; }
+.artifact-info { flex: 1; min-width: 0; }
+.artifact-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.artifact-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.artifact-status { font-size: 10px; font-weight: 600; padding: 4px 9px; border-radius: 20px; flex-shrink: 0; }
+.status-done { background: rgba(16,185,129,0.1); color: #059669; }
+.status-pending { background: rgba(245,158,11,0.1); color: #D97706; }
+.status-processing { background: rgba(91,142,240,0.1); color: var(--accent); }
+
+/* ====== INBOX ====== */
+.inbox-search {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 12px; box-shadow: var(--shadow-sm);
+}
+.inbox-search svg { width: 16px; height: 16px; stroke: var(--text3); flex-shrink: 0; }
+.inbox-search input {
+  background: transparent; border: none; outline: none;
+  color: var(--text); font-family: var(--font); font-size: 14px; width: 100%;
+}
+.inbox-search input::placeholder { color: var(--text3); }
+
+.filter-pills {
+  display: flex; gap: 6px; margin-bottom: 16px;
+  overflow-x: auto; padding-bottom: 2px; scrollbar-width: none;
+}
+.filter-pills::-webkit-scrollbar { display: none; }
+.pill {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 6px 12px;
+  font-size: 12px; font-weight: 500; color: var(--text2);
+  cursor: pointer; white-space: nowrap; transition: all 0.15s;
+  box-shadow: var(--shadow-sm);
+}
+.pill.active { background: var(--accent); border-color: var(--accent); color: white; }
+.pill-count {
+  display: inline-block; background: rgba(0,0,0,0.1);
+  border-radius: 10px; padding: 0 5px;
+  font-size: 10px; margin-left: 3px; font-weight: 600;
+}
+.pill.active .pill-count { background: rgba(255,255,255,0.25); }
+
+.chat-thread {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 0; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: all 0.15s;
+}
+.chat-thread:active { opacity: 0.7; }
+.thread-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 600; flex-shrink: 0; position: relative;
+}
+.thread-online {
+  position: absolute; bottom: 1px; right: 1px;
+  width: 12px; height: 12px; background: var(--accent3);
+  border-radius: 50%; border: 2px solid var(--bg);
+}
+.thread-info { flex: 1; min-width: 0; }
+.thread-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.thread-name { font-size: 14px; font-weight: 600; }
+.thread-time { font-size: 11px; color: var(--text3); }
+.thread-preview-row { display: flex; align-items: center; gap: 6px; }
+.thread-preview { font-size: 13px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.thread-unread {
+  min-width: 20px; height: 20px; background: var(--accent);
+  border-radius: 10px; font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 6px; flex-shrink: 0; color: white;
+}
+.ai-handled-badge {
+  font-size: 9px; font-weight: 600; color: var(--accent2);
+  background: rgba(139,92,246,0.1); padding: 3px 7px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;
+}
+.needs-you-badge {
+  font-size: 9px; font-weight: 600; color: var(--accent4);
+  background: rgba(245,158,11,0.1); padding: 3px 7px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;
+}
+
+/* ====== INBOX DETAIL ====== */
+.inbox-detail {
+  position: fixed; inset: 0; background: var(--bg);
+  z-index: 100; display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  max-width: 430px; margin: 0 auto;
+}
+.inbox-detail.open { transform: translateX(0); }
+.detail-header {
+  height: 56px; display: flex; align-items: center; gap: 12px;
+  padding: 0 16px; background: var(--surface);
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.back-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--surface2); border: none;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.back-btn svg { width: 18px; height: 18px; stroke: var(--text); }
+.detail-user { flex: 1; min-width: 0; }
+.detail-name { font-size: 15px; font-weight: 600; }
+.detail-status { font-size: 11px; }
+.ai-on-btn {
+  background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.2);
+  border-radius: 8px; padding: 5px 10px;
+  font-size: 11px; font-weight: 600; color: var(--accent2);
+  cursor: pointer; font-family: var(--font);
+  display: flex; align-items: center; gap: 5px; white-space: nowrap;
+}
+.ai-on-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: pulse 2s infinite; }
+
+.detail-messages {
+  flex: 1; overflow-y: auto; padding: 16px;
+  display: flex; flex-direction: column; gap: 10px; background: var(--bg);
+}
+.msg { max-width: 78%; }
+.msg-in { align-self: flex-start; }
+.msg-out { align-self: flex-end; }
+.msg-bubble { padding: 10px 14px; border-radius: 18px; font-size: 14px; line-height: 1.55; }
+.msg-in .msg-bubble {
+  background: var(--surface); border: 1px solid var(--border);
+  border-bottom-left-radius: 4px; color: var(--text);
+}
+.msg-out .msg-bubble { background: var(--accent); border-bottom-right-radius: 4px; color: white; }
+.msg-out.ai-msg .msg-bubble { background: var(--accent2); }
+.msg-time { font-size: 10px; color: var(--text3); margin-top: 4px; padding: 0 4px; }
+.msg-out .msg-time { text-align: right; }
+.ai-indicator { font-size: 10px; color: var(--accent2); margin-top: 3px; padding: 0 4px; display: flex; align-items: center; gap: 4px; }
+.ai-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent2); flex-shrink: 0; }
+
+.detail-input-wrap {
+  padding: 10px 16px; padding-bottom: calc(10px + var(--safe-bottom));
+  background: var(--surface); border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.ai-reply-btn {
+  background: rgba(139,92,246,0.07); border: 1px solid rgba(139,92,246,0.18);
+  border-radius: 10px; padding: 9px 14px;
+  font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--accent2);
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: all 0.2s; width: 100%;
+}
+.ai-reply-btn:active { background: rgba(139,92,246,0.14); }
+.ai-reply-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+.detail-input-row { display: flex; gap: 8px; align-items: flex-end; }
+.detail-input {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 10px 16px;
+  color: var(--text); font-family: var(--font); font-size: 14px;
+  outline: none; resize: none; min-height: 40px; max-height: 100px;
+}
+.detail-input::placeholder { color: var(--text3); }
+.send-btn {
+  width: 40px; height: 40px; background: var(--accent); border: none;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+}
+.send-btn svg { width: 16px; height: 16px; stroke: white; fill: none; }
+
+/* ====== CHAT ====== */
+.persona-chat-header {
+  background: linear-gradient(135deg, rgba(91,142,240,0.07), rgba(139,92,246,0.07));
+  border: 1px solid rgba(91,142,240,0.15);
+  border-radius: var(--radius); padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px; box-shadow: var(--shadow-sm);
+}
+.pch-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; font-weight: 700; color: white;
+}
+.pch-info { flex: 1; }
+.pch-name { font-size: 14px; font-weight: 600; }
+.pch-status { font-size: 11px; color: var(--accent2); display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+.pch-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent2); animation: pulse 2s infinite; }
+
+.suggestion-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.chip {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 7px 12px;
+  font-size: 12px; color: var(--text2); cursor: pointer;
+  transition: all 0.15s; white-space: nowrap; box-shadow: var(--shadow-sm);
+}
+.chip:active { background: var(--accent); color: white; border-color: var(--accent); }
+
+.chat-messages { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.chat-input-row { display: flex; gap: 10px; align-items: flex-end; }
+.chat-input {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 10px 16px;
+  color: var(--text); font-family: var(--font); font-size: 14px;
+  outline: none; resize: none; box-shadow: var(--shadow-sm);
+}
+.chat-input::placeholder { color: var(--text3); }
+
+.source-card {
+  background: rgba(91,142,240,0.05); border: 1px solid rgba(91,142,240,0.15);
+  border-radius: 10px; padding: 10px 12px; margin-top: 2px;
+  align-self: flex-start; max-width: 78%;
+}
+.source-label { font-size: 10px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
+.source-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.source-tag { font-size: 10px; font-family: var(--mono); color: var(--accent); background: rgba(91,142,240,0.1); padding: 2px 7px; border-radius: 4px; }
+
+/* ====== MEMORY ====== */
+.memory-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.mem-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; box-shadow: var(--shadow-sm); }
+.mem-stat-num { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
+.mem-stat-label { font-size: 10px; color: var(--text3); font-weight: 500; }
+
+.memory-tabs {
+  display: flex; gap: 4px; margin-bottom: 16px;
+  background: var(--surface2); border-radius: var(--radius-sm); padding: 4px;
+}
+.mem-tab {
+  flex: 1; padding: 8px; border-radius: 8px;
+  font-size: 12px; font-weight: 500; color: var(--text3);
+  text-align: center; cursor: pointer; transition: all 0.2s;
+}
+.mem-tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+
+.mindmap-wrap {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+  margin-bottom: 12px; overflow-x: auto; box-shadow: var(--shadow-sm);
+}
+.mindmap-svg { display: block; margin: 0 auto; }
+.mindmap-legend { display: flex; gap: 12px; flex-wrap: wrap; padding: 4px 0; margin-top: 8px; }
+.legend-item { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 5px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.folder-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: all 0.15s;
+}
+.folder-item:last-child { border-bottom: none; }
+.folder-item:active { opacity: 0.7; }
+.folder-icon-wrap { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+.folder-info { flex: 1; }
+.folder-name { font-size: 13px; font-weight: 500; font-family: var(--mono); color: var(--text); }
+.folder-count { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.folder-arrow { color: var(--text3); font-size: 16px; }
+
+.file-list { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; margin-bottom: 12px; }
+.file-list::-webkit-scrollbar { display: none; }
+.file-chip {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 10px;
+  font-size: 10px; font-family: var(--mono); color: var(--text3);
+  cursor: pointer; white-space: nowrap; transition: all 0.15s;
+}
+.file-chip.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+.md-viewer { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow-sm); }
+.md-path { font-size: 11px; color: var(--text3); font-family: var(--mono); margin-bottom: 10px; }
+.md-title { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+.md-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
+.md-tag { background: rgba(91,142,240,0.08); color: var(--accent); font-size: 10px; font-family: var(--mono); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(91,142,240,0.15); }
+.md-section { margin-top: 14px; }
+.md-section-title { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 7px; }
+.md-content { font-size: 13px; color: var(--text2); line-height: 1.75; }
+.md-list { list-style: none; }
+.md-list li { font-size: 13px; color: var(--text2); line-height: 1.75; padding-left: 16px; position: relative; margin-bottom: 2px; }
+.md-list li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-size: 11px; top: 3px; }
+.wikilink { color: var(--accent); background: rgba(91,142,240,0.07); border-radius: 3px; padding: 1px 4px; font-size: 12px; font-family: var(--mono); cursor: pointer; }
+
+/* Persona card edit */
+.persona-card { align-items: stretch; }
+.persona-edit-btn {
+  background: rgba(255,255,255,0.5); border: 1px solid rgba(91,142,240,0.2);
+  border-radius: 8px; width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; color: var(--accent);
+  transition: all 0.15s;
+}
+.persona-edit-btn:active { background: rgba(255,255,255,0.8); }
+.persona-edit-btn svg { width: 15px; height: 15px; }
+.persona-edit-input {
+  width: 100%; background: rgba(255,255,255,0.6);
+  border: 1px solid rgba(91,142,240,0.3); border-radius: 8px;
+  padding: 8px 12px; font-family: var(--font); font-size: 14px;
+  color: var(--text); outline: none; display: block;
+}
+.persona-edit-input:focus { border-color: var(--accent); background: rgba(255,255,255,0.9); }
+.persona-save-btn {
+  margin-top: 10px; background: var(--accent); border: none;
+  border-radius: 8px; padding: 8px 18px;
+  color: white; font-family: var(--font); font-size: 13px; font-weight: 600;
+  cursor: pointer;
+}
+
+/* Card header row with edit button */
+.card-header-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.card-edit-btn {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 5px 10px;
+  font-size: 12px; font-weight: 500; color: var(--text2);
+  cursor: pointer; font-family: var(--font);
+  display: flex; align-items: center; gap: 5px; transition: all 0.15s;
+}
+.card-edit-btn:active { background: var(--surface3); }
+.card-edit-btn svg { width: 13px; height: 13px; }
+
+/* Q&A blocks */
+.q-block { margin-bottom: 18px; }
+.q-label {
+  font-size: 11px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px;
+}
+.q-answer { font-size: 14px; color: var(--text2); line-height: 1.65; }
+.q-textarea {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 12px;
+  font-family: var(--font); font-size: 14px; color: var(--text);
+  line-height: 1.6; resize: none; outline: none; transition: border-color 0.2s;
+}
+.q-textarea:focus { border-color: var(--accent); }
+
+/* Artifact filters */
+.artifact-filters { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+.artifact-search {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 9px 12px;
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.artifact-search svg { width: 15px; height: 15px; stroke: var(--text3); flex-shrink: 0; }
+.artifact-search input {
+  background: transparent; border: none; outline: none;
+  color: var(--text); font-family: var(--font); font-size: 13px; width: 100%;
+}
+.artifact-search input::placeholder { color: var(--text3); }
+.artifact-filter-row { display: flex; align-items: center; gap: 8px; }
+.date-filter {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 6px 10px;
+  font-size: 12px; font-weight: 500; color: var(--text2);
+  font-family: var(--font); outline: none; cursor: pointer;
+  flex-shrink: 0; box-shadow: var(--shadow-sm);
+}
+
+/* Artifact detail pane */
+.artifact-viewer-note { font-size:14px; color:var(--text2); line-height:1.75; white-space:pre-wrap; }
+.audio-player {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; width: 100%;
+}
+.waveform {
+  display: flex; align-items: center; gap: 3px;
+  height: 52px; margin-bottom: 16px; overflow: hidden;
+}
+.wave-bar {
+  flex: 1; border-radius: 2px; background: var(--accent);
+  opacity: 0.3; transition: opacity 0.2s;
+}
+.wave-bar.played { opacity: 1; }
+.audio-controls { display: flex; align-items: center; gap: 12px; }
+.play-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--accent); border: none; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.play-btn svg { width: 18px; height: 18px; stroke: white; fill: white; }
+.audio-time { font-size: 12px; color: var(--text3); font-family: var(--mono); flex-shrink: 0; }
+.audio-progress { flex: 1; height: 4px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+.audio-progress-fill { height: 100%; width: 35%; background: var(--accent); border-radius: 2px; }
+.video-player {
+  background: #0C0F14; border-radius: var(--radius);
+  aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px; position: relative; overflow: hidden;
+}
+.video-play-btn {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); backdrop-filter: blur(4px);
+  border: 2px solid rgba(255,255,255,0.3);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.video-play-btn svg { width: 22px; height: 22px; stroke: white; fill: white; margin-left: 3px; }
+.video-meta { font-size: 13px; color: var(--text2); margin-bottom: 12px; }
+.processing-banner {
+  background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  font-size: 13px; color: #D97706; display: flex; align-items: center; gap: 8px;
+}
+.processing-banner svg { width: 16px; height: 16px; stroke: currentColor; flex-shrink: 0; }
+.doc-preview {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  margin-bottom: 16px;
+}
+.doc-icon-large { font-size: 44px; }
+.doc-filename { font-size: 14px; font-weight: 600; color: var(--text); text-align: center; }
+.doc-filesize { font-size: 12px; color: var(--text3); }
+.download-btn {
+  width: 100%; background: var(--accent); border: none;
+  border-radius: var(--radius-sm); padding: 13px;
+  color: white; font-family: var(--font); font-size: 14px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.download-btn svg { width: 16px; height: 16px; stroke: white; }
+.faq-q-block {
+  background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.15);
+  border-radius: var(--radius-sm); padding: 14px; margin-bottom: 12px;
+}
+.faq-q-label { font-size: 10px; font-weight: 700; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+.faq-q-text { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.5; }
+.faq-a-block {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px;
+}
+.faq-a-label { font-size: 10px; font-weight: 700; color: var(--accent3); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+.faq-a-text { font-size: 14px; color: var(--text2); line-height: 1.7; }
+.artifact-action-row { display: flex; gap: 8px; margin-top: 16px; }
+.artifact-action-btn {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 11px;
+  font-family: var(--font); font-size: 13px; font-weight: 500; color: var(--text2);
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.artifact-action-btn svg { width: 15px; height: 15px; stroke: currentColor; }
+
+/* Artifact list rows */
+.artifact-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 0; border-bottom: 1px solid var(--border);
+}
+.artifact-row:last-child { border-bottom: none; }
+.artifact-row.hidden { display: none; }
+.arow-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.arow-icon svg { width: 17px; height: 17px; }
+.arow-info { flex: 1; min-width: 0; }
+.arow-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.arow-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.arow-type-tag { font-weight: 600; }
+
+/* Add artifact button */
+.add-artifact-btn {
+  background: var(--accent); border: none;
+  border-radius: 8px; padding: 7px 12px;
+  font-size: 12px; font-weight: 600; color: white;
+  cursor: pointer; font-family: var(--font);
+  display: flex; align-items: center; gap: 5px;
+  transition: all 0.15s;
+}
+.add-artifact-btn:active { opacity: 0.85; }
+.add-artifact-btn svg { width: 13px; height: 13px; }
+
+/* Artifact type list */
+.artifact-type-list { display: flex; flex-direction: column; }
+.artifact-type-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 0; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: opacity 0.15s;
+}
+.artifact-type-item:active { opacity: 0.6; }
+.artifact-type-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.artifact-type-icon svg { width: 18px; height: 18px; }
+.artifact-type-info { flex: 1; }
+.artifact-type-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.artifact-type-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.artifact-type-arrow { width: 16px; height: 16px; stroke: var(--text3); flex-shrink: 0; }
+
+/* Collapsible about section */
+.about-collapsible {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
+  margin-top: 0;
+}
+.about-collapsible.open {
+  max-height: 1000px;
+  margin-top: 16px;
+}
+
+/* PersonAI Questions subsections */
+.pq-subsection { border-top: 1px solid var(--border); }
+.pq-subsection-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 0; cursor: pointer; user-select: none;
+}
+.pq-subsection-header:active { opacity: 0.7; }
+.pq-subsection-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.pq-subsection-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.pq-chevron { width: 18px; height: 18px; flex-shrink: 0; transition: transform 0.25s; stroke: var(--text3); }
+.pq-chevron.open { transform: rotate(180deg); }
+.sub-collapsible { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1); }
+.sub-collapsible.open { max-height: 3000px; }
+.pq-item {
+  display: flex; gap: 10px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.pq-item:last-of-type { border-bottom: none; }
+.pq-num { font-size: 11px; font-weight: 700; color: var(--text3); min-width: 18px; padding-top: 3px; }
+.pq-body { flex: 1; }
+.pq-question { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 7px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="topbar-logo-dot"></div>
+    PersonAI.help
+  </div>
+  <div class="topbar-avatar">G</div>
+</div>
+
+<!-- PAGES -->
+<div class="pages">
+
+  <!-- PROFILE PAGE -->
+  <div class="page active" id="page-profile">
+
+    <!-- Identity + About card -->
+    <div class="persona-card" style="flex-direction:column;align-items:stretch;gap:0">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div style="flex:1;min-width:0">
+          <div id="persona-view">
+            <div class="persona-name" id="persona-name-display">Gizem Tanriseven</div>
+            <div class="persona-role" id="persona-role-display">US Nurse Immigration Expert</div>
+          </div>
+          <div id="persona-edit" style="display:none">
+            <input class="persona-edit-input" id="persona-name-input" value="Gizem Tanriseven" placeholder="Full name">
+            <input class="persona-edit-input" id="persona-role-input" value="US Nurse Immigration Expert" placeholder="Occupation" style="margin-top:6px">
+            <button class="persona-save-btn" onclick="savePersona()">Save</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0;margin-left:12px">
+          <button class="card-edit-btn" id="about-edit-btn" onclick="toggleAboutEdit()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit
+          </button>
+        </div>
+      </div>
+      <div class="about-collapsible" id="about-collapsible">
+        <div style="height:1px;background:rgba(91,142,240,0.15);margin:16px 0"></div>
+        <div class="q-block">
+          <div class="q-label">Full name</div>
+          <input class="q-textarea" id="name-input" value="Gizem Tanriseven" placeholder="Your full name" style="min-height:0;padding:10px 12px">
+        </div>
+        <div class="q-block">
+          <div class="q-label">What is your occupation?</div>
+          <textarea class="q-textarea" id="q4-input" rows="2" placeholder="Your job title or role">US Nurse Immigration Consultant & Career Coach</textarea>
+        </div>
+        <div class="q-block">
+          <div class="q-label">How long have you been in your occupation?</div>
+          <textarea class="q-textarea" id="q5-input" rows="2" placeholder="e.g. 10 years">8 years as a consultant, 12 years total as a registered nurse.</textarea>
+        </div>
+        <div class="q-block">
+          <div class="q-label">How do you help people?</div>
+          <textarea class="q-textarea" id="q1-input" rows="3" placeholder="Describe how you help your clients...">I guide Turkish nurses through every step of getting licensed and immigrating to the USA — from credential evaluation and NCLEX prep to visa sponsorship and state board applications.</textarea>
+        </div>
+        <div class="q-block">
+          <div class="q-label">Why are you qualified to help?</div>
+          <textarea class="q-textarea" id="q2-input" rows="3" placeholder="Share your credentials and experience...">I went through this process myself and have since helped over 200 nurses successfully relocate. I have first-hand experience with CGFNS, multiple state boards, and EB-3 visa sponsorship.</textarea>
+        </div>
+        <div class="q-block">
+          <div class="q-label">How long have you been helping people with this?</div>
+          <textarea class="q-textarea" id="q3-input" rows="2" placeholder="e.g. 5 years">Over 8 years. I started helping colleagues in 2016 and turned it into a full-time consulting practice in 2019.</textarea>
+        </div>
+        <button class="add-btn" onclick="saveAbout()">Save</button>
+      </div>
+    </div>
+
+    <!-- PersonAI Questions -->
+    <div class="card">
+      <div class="card-header-row">
+        <div>
+          <div class="card-label" style="margin-bottom:2px">PersonAI Questions</div>
+          <div style="font-size:11px;color:var(--text3)">System-generated questions for your persona</div>
+        </div>
+        <button class="card-edit-btn" id="pq-toggle-btn" onclick="togglePQSection()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          Expand
+        </button>
+      </div>
+
+      <div class="about-collapsible" id="pq-outer">
+        <div style="height:1px;background:var(--border);margin:14px 0 0"></div>
+
+        <!-- Personality Questions -->
+        <div class="pq-subsection">
+          <div class="pq-subsection-header" onclick="togglePQSub('personality')">
+            <div>
+              <div class="pq-subsection-title">Personality Questions</div>
+              <div class="pq-subsection-sub">10 questions · 0 answered</div>
+            </div>
+            <svg class="pq-chevron" id="chev-personality" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="sub-collapsible" id="sub-personality">
+            <div class="pq-item">
+              <div class="pq-num">1</div>
+              <div class="pq-body">
+                <div class="pq-question">What style do you use most when explaining a topic?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">2</div>
+              <div class="pq-body">
+                <div class="pq-question">How would you approach motivating someone?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">3</div>
+              <div class="pq-body">
+                <div class="pq-question">What topic excites you the most and how do you show it?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">4</div>
+              <div class="pq-body">
+                <div class="pq-question">How do you simplify a complex topic?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">5</div>
+              <div class="pq-body">
+                <div class="pq-question">How would you correct someone who tells you wrong information?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">6</div>
+              <div class="pq-body">
+                <div class="pq-question">How would you describe a successful project of yours?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">7</div>
+              <div class="pq-body">
+                <div class="pq-question">How would you describe your sense of humor?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">8</div>
+              <div class="pq-body">
+                <div class="pq-question">Does your communication style change under stress? How?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">9</div>
+              <div class="pq-body">
+                <div class="pq-question">What person, book, or experience inspires you?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">10</div>
+              <div class="pq-body">
+                <div class="pq-question">What is your general attitude toward your followers or students?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <button class="add-btn" style="margin-top:4px">Save answers</button>
+          </div>
+        </div>
+
+        <!-- Expertise Questions -->
+        <div class="pq-subsection">
+          <div class="pq-subsection-header" onclick="togglePQSub('expertise')">
+            <div>
+              <div class="pq-subsection-title">Expertise Questions</div>
+              <div class="pq-subsection-sub">Generated from your profile · 10 questions</div>
+            </div>
+            <svg class="pq-chevron" id="chev-expertise" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="sub-collapsible" id="sub-expertise">
+            <div class="pq-item">
+              <div class="pq-num">1</div>
+              <div class="pq-body">
+                <div class="pq-question">What is the single most common mistake Turkish nurses make when starting the US licensure process?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">2</div>
+              <div class="pq-body">
+                <div class="pq-question">Which US states do you recommend most for Turkish nurses and what makes them stand out?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">3</div>
+              <div class="pq-body">
+                <div class="pq-question">Walk me through the CGFNS credential evaluation process step by step.</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">4</div>
+              <div class="pq-body">
+                <div class="pq-question">How does EB-3 visa sponsorship work and how long does it realistically take?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">5</div>
+              <div class="pq-body">
+                <div class="pq-question">What English proficiency scores are required and which test do you recommend?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">6</div>
+              <div class="pq-body">
+                <div class="pq-question">What is VisaScreen, who needs it, and when should nurses start the process?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">7</div>
+              <div class="pq-body">
+                <div class="pq-question">How do you choose between credential evaluation agencies like CGFNS vs Josef Silny?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">8</div>
+              <div class="pq-body">
+                <div class="pq-question">What documents should a Turkish nurse have ready before starting the application?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">9</div>
+              <div class="pq-body">
+                <div class="pq-question">What advice do you give to a nurse who failed the NCLEX on their first attempt?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">10</div>
+              <div class="pq-body">
+                <div class="pq-question">How does endorsing a nursing license from one state to another work?</div>
+                <textarea class="q-textarea" rows="2" placeholder="Your answer..."></textarea>
+              </div>
+            </div>
+            <button class="add-btn" style="margin-top:4px">Save answers</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Training artifacts -->
+    <div class="card">
+      <div class="card-header-row">
+        <div class="card-label" style="margin-bottom:0">Training material</div>
+        <button class="add-artifact-btn" id="add-artifact-btn" onclick="toggleArtifactPicker()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add artifact
+        </button>
+      </div>
+
+      <!-- Artifact type picker -->
+      <div class="about-collapsible" id="artifact-picker">
+        <div style="height:1px;background:var(--border);margin:12px 0"></div>
+        <div class="artifact-type-list">
+          <div class="artifact-type-item" onclick="selectArtifactType(this)">
+            <div class="artifact-type-icon" style="background:rgba(245,158,11,0.1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </div>
+            <div class="artifact-type-info">
+              <div class="artifact-type-name">Note</div>
+              <div class="artifact-type-sub">Type directly</div>
+            </div>
+            <svg class="artifact-type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="artifact-type-item" onclick="selectArtifactType(this)">
+            <div class="artifact-type-icon" style="background:rgba(16,185,129,0.1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </div>
+            <div class="artifact-type-info">
+              <div class="artifact-type-name">Voice</div>
+              <div class="artifact-type-sub">MP3, M4A, WAV</div>
+            </div>
+            <svg class="artifact-type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="artifact-type-item" onclick="selectArtifactType(this)">
+            <div class="artifact-type-icon" style="background:rgba(239,68,68,0.1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            </div>
+            <div class="artifact-type-info">
+              <div class="artifact-type-name">Video</div>
+              <div class="artifact-type-sub">MP4, MOV</div>
+            </div>
+            <svg class="artifact-type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="artifact-type-item" onclick="selectArtifactType(this)">
+            <div class="artifact-type-icon" style="background:rgba(91,142,240,0.1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#5B8EF0" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div class="artifact-type-info">
+              <div class="artifact-type-name">Document</div>
+              <div class="artifact-type-sub">PDF, Word, TXT</div>
+            </div>
+            <svg class="artifact-type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="artifact-type-item" onclick="selectArtifactType(this)">
+            <div class="artifact-type-icon" style="background:rgba(139,92,246,0.1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="artifact-type-info">
+              <div class="artifact-type-name">FAQ</div>
+              <div class="artifact-type-sub">Question & answer</div>
+            </div>
+            <svg class="artifact-type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="artifact-type-item" onclick="selectArtifactType(this)">
+            <div class="artifact-type-icon" style="background:rgba(37,211,102,0.1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            </div>
+            <div class="artifact-type-info">
+              <div class="artifact-type-name">WhatsApp Chat</div>
+              <div class="artifact-type-sub">Exported chat history</div>
+            </div>
+            <svg class="artifact-type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="artifact-type-item" style="border-bottom:none" onclick="selectArtifactType(this)">
+            <div class="artifact-type-icon" style="background:rgba(225,48,108,0.1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#E1306C" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </div>
+            <div class="artifact-type-info">
+              <div class="artifact-type-name">Instagram Chat</div>
+              <div class="artifact-type-sub">Exported DM history</div>
+            </div>
+            <svg class="artifact-type-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Artifact filters -->
+      <div class="artifact-filters">
+        <div class="artifact-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="artifact-search" placeholder="Search artifacts..." oninput="filterArtifacts()">
+        </div>
+        <div class="artifact-filter-row">
+          <select class="date-filter" id="type-filter" onchange="filterArtifacts()" style="flex:1">
+            <option value="all">All types</option>
+            <option value="note">Note</option>
+            <option value="voice">Voice</option>
+            <option value="video">Video</option>
+            <option value="document">Document</option>
+            <option value="faq">FAQ</option>
+            <option value="whatsapp">WhatsApp Chat</option>
+            <option value="instagram">Instagram Chat</option>
+          </select>
+          <select class="date-filter" id="date-filter" onchange="filterArtifacts()" style="flex:1">
+            <option value="all">Any date</option>
+            <option value="today">Today</option>
+            <option value="week">This week</option>
+            <option value="month">This month</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Artifact list -->
+      <div id="artifact-list">
+        <div class="artifact-row" data-type="note" data-date="2025-05-03" onclick="openArtifact('note','Texas board insider tips','May 3, 2025 · 10:42 AM','ready')">
+          <div class="arow-icon" style="background:rgba(245,158,11,0.1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </div>
+          <div class="arow-info">
+            <div class="arow-name">Texas board insider tips</div>
+            <div class="arow-meta"><span class="arow-type-tag" style="color:#F59E0B">Note</span> · May 3, 2025 · 10:42 AM</div>
+          </div>
+          <div class="artifact-status status-done">Ready</div>
+        </div>
+        <div class="artifact-row" data-type="document" data-date="2025-05-03" onclick="openArtifact('document','NCLEX Study Guide 2024.pdf','May 3, 2025 · 8:15 AM','ready')">
+          <div class="arow-icon" style="background:rgba(91,142,240,0.1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#5B8EF0" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="arow-info">
+            <div class="arow-name">NCLEX Study Guide 2024.pdf</div>
+            <div class="arow-meta"><span class="arow-type-tag" style="color:#5B8EF0">Document</span> · May 3, 2025 · 8:15 AM</div>
+          </div>
+          <div class="artifact-status status-done">Ready</div>
+        </div>
+        <div class="artifact-row" data-type="voice" data-date="2025-05-02" onclick="openArtifact('voice','My CGFNS experience.m4a','May 2, 2025 · 3:30 PM','ready')">
+          <div class="arow-icon" style="background:rgba(16,185,129,0.1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </div>
+          <div class="arow-info">
+            <div class="arow-name">My CGFNS experience.m4a</div>
+            <div class="arow-meta"><span class="arow-type-tag" style="color:#10B981">Voice</span> · May 2, 2025 · 3:30 PM</div>
+          </div>
+          <div class="artifact-status status-done">Ready</div>
+        </div>
+        <div class="artifact-row" data-type="video" data-date="2025-05-01" onclick="openArtifact('video','Texas licensing walkthrough.mp4','May 1, 2025 · 11:00 AM','processing')">
+          <div class="arow-icon" style="background:rgba(239,68,68,0.1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          </div>
+          <div class="arow-info">
+            <div class="arow-name">Texas licensing walkthrough.mp4</div>
+            <div class="arow-meta"><span class="arow-type-tag" style="color:#EF4444">Video</span> · May 1, 2025 · 11:00 AM</div>
+          </div>
+          <div class="artifact-status status-processing">Processing</div>
+        </div>
+        <div class="artifact-row" data-type="faq" data-date="2025-04-30" onclick="openArtifact('faq','Can Turkish nurses skip CGFNS?','Apr 30, 2025 · 2:15 PM','ready')">
+          <div class="arow-icon" style="background:rgba(139,92,246,0.1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="arow-info">
+            <div class="arow-name">Can Turkish nurses skip CGFNS?</div>
+            <div class="arow-meta"><span class="arow-type-tag" style="color:#8B5CF6">FAQ</span> · Apr 30, 2025 · 2:15 PM</div>
+          </div>
+          <div class="artifact-status status-done">Ready</div>
+        </div>
+        <div class="artifact-row" data-type="document" data-date="2025-04-28" onclick="openArtifact('document','EB-3 visa checklist 2025.pdf','Apr 28, 2025 · 9:05 AM','ready')">
+          <div class="arow-icon" style="background:rgba(91,142,240,0.1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#5B8EF0" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="arow-info">
+            <div class="arow-name">EB-3 visa checklist 2025.pdf</div>
+            <div class="arow-meta"><span class="arow-type-tag" style="color:#5B8EF0">Document</span> · Apr 28, 2025 · 9:05 AM</div>
+          </div>
+          <div class="artifact-status status-done">Ready</div>
+        </div>
+        <div class="artifact-row" data-type="note" data-date="2025-04-25" onclick="openArtifact('note','Florida vs Texas comparison notes','Apr 25, 2025 · 5:48 PM','ready')">
+          <div class="arow-icon" style="background:rgba(245,158,11,0.1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </div>
+          <div class="arow-info">
+            <div class="arow-name">Florida vs Texas comparison notes</div>
+            <div class="arow-meta"><span class="arow-type-tag" style="color:#F59E0B">Note</span> · Apr 25, 2025 · 5:48 PM</div>
+          </div>
+          <div class="artifact-status status-done">Ready</div>
+        </div>
+        <div class="artifact-row" data-type="whatsapp" data-date="2025-04-22" onclick="openArtifact('whatsapp','WhatsApp — Ayşe K. conversation','Apr 22, 2025 · 6:10 PM','ready')">
+          <div class="arow-icon" style="background:rgba(37,211,102,0.1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          </div>
+          <div class="arow-info">
+            <div class="arow-name">WhatsApp — Ayşe K. conversation</div>
+            <div class="arow-meta"><span class="arow-type-tag" style="color:#25D366">WhatsApp</span> · Apr 22, 2025 · 6:10 PM</div>
+          </div>
+          <div class="artifact-status status-done">Ready</div>
+        </div>
+        <div class="artifact-row" data-type="instagram" data-date="2025-04-18" onclick="openArtifact('instagram','Instagram — Merve D. DMs','Apr 18, 2025 · 2:45 PM','ready')">
+          <div class="arow-icon" style="background:rgba(225,48,108,0.1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#E1306C" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </div>
+          <div class="arow-info">
+            <div class="arow-name">Instagram — Merve D. DMs</div>
+            <div class="arow-meta"><span class="arow-type-tag" style="color:#E1306C">Instagram</span> · Apr 18, 2025 · 2:45 PM</div>
+          </div>
+          <div class="artifact-status status-done">Ready</div>
+        </div>
+        <div id="artifact-empty" style="display:none;padding:20px 0;text-align:center;font-size:13px;color:var(--text3)">No artifacts match your filters</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- INBOX PAGE -->
+  <div class="page" id="page-inbox">
+
+    <div class="section-header">
+      <div class="section-title">Inbox <span style="font-size:15px;font-weight:400;color:var(--text3)">· 4 unread</span></div>
+      <div class="section-sub">AI persona handles replies automatically</div>
+    </div>
+
+    <div class="inbox-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search conversations...">
+    </div>
+
+    <div class="filter-pills">
+      <div class="pill active" onclick="filterThreads('all',this)">All <span class="pill-count">5</span></div>
+      <div class="pill" onclick="filterThreads('unread',this)">Unread <span class="pill-count">4</span></div>
+      <div class="pill" onclick="filterThreads('ai',this)">AI handled <span class="pill-count">3</span></div>
+      <div class="pill" onclick="filterThreads('needs',this)">Needs you <span class="pill-count">2</span></div>
+    </div>
+
+    <div id="thread-list">
+      <div class="chat-thread" onclick="openThread('Ayşe K.','AK','#5B8EF0',true)">
+        <div class="thread-avatar" style="background:rgba(91,142,240,0.15);color:#5B8EF0">AK<div class="thread-online"></div></div>
+        <div class="thread-info">
+          <div class="thread-top"><div class="thread-name">Ayşe K.</div><div class="thread-time">2m ago</div></div>
+          <div class="thread-preview-row">
+            <div class="thread-preview">Do I need CGFNS if I apply in Texas?</div>
+            <div class="thread-unread">3</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-thread" onclick="openThread('Fatma Y.','FY','#8B5CF6',false)">
+        <div class="thread-avatar" style="background:rgba(139,92,246,0.15);color:#8B5CF6">FY</div>
+        <div class="thread-info">
+          <div class="thread-top"><div class="thread-name">Fatma Y.</div><div class="thread-time">1h ago</div></div>
+          <div class="thread-preview-row">
+            <div class="thread-preview">Thank you so much for the help! 🙏</div>
+            <div class="ai-handled-badge">AI handled</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-thread" onclick="openThread('Merve D.','MD','#10B981',true)">
+        <div class="thread-avatar" style="background:rgba(16,185,129,0.15);color:#10B981">MD<div class="thread-online"></div></div>
+        <div class="thread-info">
+          <div class="thread-top"><div class="thread-name">Merve D.</div><div class="thread-time">3h ago</div></div>
+          <div class="thread-preview-row">
+            <div class="thread-preview">How long does EB-3 visa processing take?</div>
+            <div class="thread-unread">1</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-thread" onclick="openThread('Zeynep A.','ZA','#F59E0B',false)">
+        <div class="thread-avatar" style="background:rgba(245,158,11,0.15);color:#F59E0B">ZA</div>
+        <div class="thread-info">
+          <div class="thread-top"><div class="thread-name">Zeynep A.</div><div class="thread-time">Yesterday</div></div>
+          <div class="thread-preview-row">
+            <div class="thread-preview">My credential evaluation was rejected...</div>
+            <div class="needs-you-badge">Needs you</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-thread" onclick="openThread('Selin T.','ST','#EF4444',false)">
+        <div class="thread-avatar" style="background:rgba(239,68,68,0.15);color:#EF4444">ST</div>
+        <div class="thread-info">
+          <div class="thread-top"><div class="thread-name">Selin T.</div><div class="thread-time">2 days ago</div></div>
+          <div class="thread-preview-row">
+            <div class="thread-preview">Which English test is accepted in California?</div>
+            <div class="ai-handled-badge">AI handled</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CHAT PAGE -->
+  <div class="page" id="page-chat">
+
+    <div class="section-header">
+      <div class="section-title">Test Persona</div>
+      <div class="section-sub">Chat as your users would</div>
+    </div>
+
+    <div class="persona-chat-header">
+      <div class="pch-avatar">G</div>
+      <div class="pch-info">
+        <div class="pch-name">Gizem AI Persona</div>
+        <div class="pch-status"><div class="pch-dot"></div> Active · 142 wiki pages loaded</div>
+      </div>
+    </div>
+
+    <div class="suggestion-chips">
+      <div class="chip" onclick="sendSuggestion(this)">NCLEX eligibility</div>
+      <div class="chip" onclick="sendSuggestion(this)">CGFNS process</div>
+      <div class="chip" onclick="sendSuggestion(this)">Best states for foreign nurses</div>
+      <div class="chip" onclick="sendSuggestion(this)">EB-3 visa timeline</div>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+      <div class="msg msg-in">
+        <div class="msg-bubble">Merhaba! I'm Gizem's AI persona. Ask me anything about becoming a nurse in the USA.</div>
+        <div class="ai-indicator"><div class="ai-dot"></div> AI persona response</div>
+        <div class="msg-time">Just now</div>
+      </div>
+    </div>
+
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask your persona anything..."></textarea>
+      <button class="send-btn" onclick="sendChatMsg()">
+        <svg viewBox="0 0 24 24" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- MEMORY PAGE -->
+  <div class="page" id="page-memory">
+
+    <div class="section-header">
+      <div class="section-title">Wiki Memory</div>
+      <div class="section-sub">Your persona's knowledge base</div>
+    </div>
+
+    <div class="memory-stats">
+      <div class="mem-stat">
+        <div class="mem-stat-num" style="color:var(--accent)">142</div>
+        <div class="mem-stat-label">Wiki pages</div>
+      </div>
+      <div class="mem-stat">
+        <div class="mem-stat-num" style="color:var(--accent2)">9</div>
+        <div class="mem-stat-label">Folders</div>
+      </div>
+      <div class="mem-stat">
+        <div class="mem-stat-num" style="color:var(--accent3)">14</div>
+        <div class="mem-stat-label">Raw sources</div>
+      </div>
+      <div class="mem-stat">
+        <div class="mem-stat-num" style="color:var(--accent4)">11</div>
+        <div class="mem-stat-label">Syntheses</div>
+      </div>
+    </div>
+
+    <div class="memory-tabs">
+      <div class="mem-tab active" onclick="switchMemTab(this,'mindmap')">Mind map</div>
+      <div class="mem-tab" onclick="switchMemTab(this,'folders')">Folders</div>
+      <div class="mem-tab" onclick="switchMemTab(this,'viewer')">Viewer</div>
+    </div>
+
+    <div id="mem-mindmap">
+      <div class="mindmap-wrap">
+        <svg class="mindmap-svg" width="340" height="280" viewBox="0 0 340 280">
+          <line x1="126" y1="130" x2="62" y2="90" stroke="rgba(0,0,0,0.1)" stroke-width="1.5"/>
+          <line x1="170" y1="116" x2="170" y2="62" stroke="rgba(0,0,0,0.1)" stroke-width="1.5"/>
+          <line x1="214" y1="130" x2="278" y2="90" stroke="rgba(0,0,0,0.1)" stroke-width="1.5"/>
+          <line x1="214" y1="150" x2="278" y2="178" stroke="rgba(0,0,0,0.1)" stroke-width="1.5"/>
+          <line x1="170" y1="164" x2="170" y2="222" stroke="rgba(0,0,0,0.1)" stroke-width="1.5"/>
+          <line x1="126" y1="150" x2="62" y2="186" stroke="rgba(0,0,0,0.1)" stroke-width="1.5"/>
+          <ellipse cx="170" cy="140" rx="44" ry="24" fill="rgba(91,142,240,0.1)" stroke="#5B8EF0" stroke-width="1.5"/>
+          <text x="170" y="144" text-anchor="middle" fill="#5B8EF0" font-size="11" font-family="Sora,sans-serif" font-weight="600">Gizem</text>
+          <ellipse cx="44" cy="82" rx="38" ry="18" fill="rgba(139,92,246,0.1)" stroke="#8B5CF6" stroke-width="1"/>
+          <text x="44" y="86" text-anchor="middle" fill="#8B5CF6" font-size="9.5" font-family="Sora,sans-serif">Expert</text>
+          <ellipse cx="170" cy="48" rx="42" ry="18" fill="rgba(16,185,129,0.1)" stroke="#10B981" stroke-width="1"/>
+          <text x="170" y="52" text-anchor="middle" fill="#10B981" font-size="9.5" font-family="Sora,sans-serif">Processes</text>
+          <ellipse cx="297" cy="82" rx="38" ry="18" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="1"/>
+          <text x="297" y="86" text-anchor="middle" fill="#F59E0B" font-size="9.5" font-family="Sora,sans-serif">States</text>
+          <ellipse cx="297" cy="178" rx="38" ry="18" fill="rgba(239,68,68,0.1)" stroke="#EF4444" stroke-width="1"/>
+          <text x="297" y="182" text-anchor="middle" fill="#EF4444" font-size="9.5" font-family="Sora,sans-serif">Visas</text>
+          <ellipse cx="170" cy="232" rx="38" ry="18" fill="rgba(91,142,240,0.07)" stroke="#5B8EF0" stroke-width="1"/>
+          <text x="170" y="236" text-anchor="middle" fill="#5B8EF0" font-size="9.5" font-family="Sora,sans-serif">FAQs (37)</text>
+          <ellipse cx="44" cy="186" rx="38" ry="18" fill="rgba(16,185,129,0.07)" stroke="#10B981" stroke-width="1"/>
+          <text x="44" y="190" text-anchor="middle" fill="#10B981" font-size="9.5" font-family="Sora,sans-serif">Concepts</text>
+        </svg>
+        <div class="mindmap-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#8B5CF6"></div>Expert</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#10B981"></div>Processes</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>States</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#EF4444"></div>Visas</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#5B8EF0"></div>FAQs</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#10B981"></div>Concepts</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="mem-folders" style="display:none">
+      <div class="card">
+        <div class="folder-item">
+          <div class="folder-icon-wrap" style="background:rgba(139,92,246,0.08)">👤</div>
+          <div class="folder-info"><div class="folder-name">expert/</div><div class="folder-count">3 pages · Profile, Journey, Insights</div></div>
+          <div class="folder-arrow">›</div>
+        </div>
+        <div class="folder-item">
+          <div class="folder-icon-wrap" style="background:rgba(16,185,129,0.08)">🗺️</div>
+          <div class="folder-info"><div class="folder-name">processes/</div><div class="folder-count">8 pages · NCLEX, CGFNS, EB-3...</div></div>
+          <div class="folder-arrow">›</div>
+        </div>
+        <div class="folder-item">
+          <div class="folder-icon-wrap" style="background:rgba(91,142,240,0.08)">📋</div>
+          <div class="folder-info"><div class="folder-name">requirements/</div><div class="folder-count">12 pages · Documents, Scores, Fees</div></div>
+          <div class="folder-arrow">›</div>
+        </div>
+        <div class="folder-item">
+          <div class="folder-icon-wrap" style="background:rgba(245,158,11,0.08)">🏛️</div>
+          <div class="folder-info"><div class="folder-name">organizations/</div><div class="folder-count">6 pages · CGFNS, NCSBN, USCIS...</div></div>
+          <div class="folder-arrow">›</div>
+        </div>
+        <div class="folder-item">
+          <div class="folder-icon-wrap" style="background:rgba(239,68,68,0.08)">🗽</div>
+          <div class="folder-info"><div class="folder-name">states/</div><div class="folder-count">14 pages · TX, CA, FL, NY...</div></div>
+          <div class="folder-arrow">›</div>
+        </div>
+        <div class="folder-item">
+          <div class="folder-icon-wrap" style="background:rgba(16,185,129,0.08)">✈️</div>
+          <div class="folder-info"><div class="folder-name">visas/</div><div class="folder-count">4 pages · EB-3, H-1B, TN, J-1</div></div>
+          <div class="folder-arrow">›</div>
+        </div>
+        <div class="folder-item">
+          <div class="folder-icon-wrap" style="background:rgba(91,142,240,0.08)">💡</div>
+          <div class="folder-info"><div class="folder-name">concepts/</div><div class="folder-count">22 pages · Retrogression, Endorsement...</div></div>
+          <div class="folder-arrow">›</div>
+        </div>
+        <div class="folder-item">
+          <div class="folder-icon-wrap" style="background:rgba(139,92,246,0.08)">❓</div>
+          <div class="folder-info"><div class="folder-name">faqs/</div><div class="folder-count">37 pages</div></div>
+          <div class="folder-arrow">›</div>
+        </div>
+        <div class="folder-item">
+          <div class="folder-icon-wrap" style="background:rgba(245,158,11,0.08)">🔗</div>
+          <div class="folder-info"><div class="folder-name">synthesis/</div><div class="folder-count">11 pages · cross-source analyses</div></div>
+          <div class="folder-arrow">›</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="mem-viewer" style="display:none">
+      <div class="file-list">
+        <div class="file-chip active" onclick="selectFile(this,'insights')">expert/gizem-insights.md</div>
+        <div class="file-chip" onclick="selectFile(this,'cgfns')">processes/cgfns-process.md</div>
+        <div class="file-chip" onclick="selectFile(this,'texas')">states/texas.md</div>
+        <div class="file-chip" onclick="selectFile(this,'eb3')">visas/eb-3.md</div>
+      </div>
+      <div class="md-viewer" id="md-content"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- INBOX DETAIL OVERLAY -->
+<div class="inbox-detail" id="inbox-detail">
+  <div class="detail-header">
+    <button class="back-btn" onclick="closeThread()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div id="detail-avatar" style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0"></div>
+    <div class="detail-user">
+      <div class="detail-name" id="detail-name"></div>
+      <div class="detail-status" id="detail-status"></div>
+    </div>
+    <div class="ai-on-btn"><div class="ai-on-dot"></div> AI on</div>
+  </div>
+  <div class="detail-messages" id="detail-messages"></div>
+  <div class="detail-input-wrap">
+    <button class="ai-reply-btn" onclick="triggerAIReply()">
+      <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Let AI reply
+    </button>
+    <div class="detail-input-row">
+      <textarea class="detail-input" id="detail-input" rows="1" placeholder="Reply manually..."></textarea>
+      <button class="send-btn" onclick="sendDetailMsg()">
+        <svg viewBox="0 0 24 24" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ARTIFACT DETAIL OVERLAY -->
+<div class="inbox-detail" id="artifact-detail">
+  <div class="detail-header">
+    <button class="back-btn" onclick="closeArtifact()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div style="flex:1;min-width:0">
+      <div class="detail-name" id="artifact-detail-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+        <span id="artifact-detail-type-badge" style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px"></span>
+        <span id="artifact-detail-date" style="font-size:11px;color:var(--text3)"></span>
+      </div>
+    </div>
+  </div>
+  <div class="detail-messages" id="artifact-detail-body" style="padding:20px;gap:0"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="nav">
+  <div class="nav-item active" onclick="switchPage('profile',this)">
+    <div class="nav-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <div class="nav-label">Profile</div>
+  </div>
+  <div class="nav-item" onclick="switchPage('inbox',this)">
+    <div class="nav-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <div class="nav-badge">4</div>
+    </div>
+    <div class="nav-label">Inbox</div>
+  </div>
+  <div class="nav-item" onclick="switchPage('chat',this)">
+    <div class="nav-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    </div>
+    <div class="nav-label">Chat</div>
+  </div>
+  <div class="nav-item" onclick="switchPage('memory',this)">
+    <div class="nav-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+    </div>
+    <div class="nav-label">Memory</div>
+  </div>
+</nav>
+
+<script>
+function switchPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+const threadData = {
+  'Ayşe K.': [
+    { dir:'in', text:'Do I need CGFNS if I apply in Texas?', time:'10:24 AM' },
+    { dir:'out', ai:true, text:'Texas does not require CGFNS certification for initial licensure. You still need a credential evaluation — you can use CGFNS or another approved agency like Josef Silny.', time:'10:24 AM' },
+    { dir:'in', text:'Oh great! Which agency do you recommend?', time:'10:26 AM' },
+    { dir:'in', text:'And how long does it take?', time:'10:26 AM' },
+  ],
+  'Fatma Y.': [
+    { dir:'in', text:'Is IELTS accepted by all US state nursing boards?', time:'Yesterday' },
+    { dir:'out', ai:true, text:'Most state boards accept IELTS Academic with a minimum overall band of 6.5 and no component below 6.0. Some states also accept TOEFL or OET.', time:'Yesterday' },
+    { dir:'in', text:'Thank you so much for the help! 🙏', time:'1h ago' },
+  ],
+  'Merve D.': [
+    { dir:'in', text:'How long does EB-3 visa processing take?', time:'3h ago' },
+  ],
+  'Zeynep A.': [
+    { dir:'in', text:'My credential evaluation was rejected...', time:'Yesterday' },
+    { dir:'in', text:"CGFNS said my nursing school hours don't meet requirements. What should I do?", time:'Yesterday' },
+  ],
+  'Selin T.': [
+    { dir:'in', text:'Which English test is accepted in California?', time:'2 days ago' },
+    { dir:'out', ai:true, text:'California BRN accepts TOEFL iBT (min 83), IELTS Academic (6.5), OET Nursing (grade B). California has stricter requirements than most states — plan accordingly.', time:'2 days ago' },
+  ],
+};
+
+function openThread(name, initials, color, online) {
+  document.getElementById('detail-name').textContent = name;
+  const st = document.getElementById('detail-status');
+  st.textContent = online ? 'online' : 'last seen recently';
+  st.style.color = online ? 'var(--accent3)' : 'var(--text3)';
+  const av = document.getElementById('detail-avatar');
+  av.textContent = initials;
+  av.style.background = color + '22';
+  av.style.color = color;
+
+  const msgs = document.getElementById('detail-messages');
+  msgs.innerHTML = '';
+  (threadData[name] || []).forEach(m => {
+    const d = document.createElement('div');
+    d.className = 'msg msg-' + m.dir + (m.ai ? ' ai-msg' : '');
+    d.innerHTML = `<div class="msg-bubble">${m.text}</div>${m.ai ? '<div class="ai-indicator"><div class="ai-dot"></div> Answered by AI persona</div>' : ''}<div class="msg-time">${m.time}</div>`;
+    msgs.appendChild(d);
+  });
+  msgs.scrollTop = msgs.scrollHeight;
+  document.getElementById('inbox-detail').classList.add('open');
+}
+
+function closeThread() {
+  document.getElementById('inbox-detail').classList.remove('open');
+}
+
+function sendDetailMsg() {
+  const input = document.getElementById('detail-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const msgs = document.getElementById('detail-messages');
+  const d = document.createElement('div');
+  d.className = 'msg msg-out';
+  d.innerHTML = `<div class="msg-bubble">${text}</div><div class="msg-time">Just now</div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+  input.value = '';
+}
+
+function triggerAIReply() {
+  const msgs = document.getElementById('detail-messages');
+  const typing = document.createElement('div');
+  typing.className = 'msg msg-out ai-msg';
+  typing.innerHTML = `<div class="msg-bubble" style="opacity:0.5;font-style:italic">AI is composing...</div>`;
+  msgs.appendChild(typing);
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => {
+    typing.remove();
+    const d = document.createElement('div');
+    d.className = 'msg msg-out ai-msg';
+    d.innerHTML = `<div class="msg-bubble">For credential evaluation, I'd recommend Josef Silny & Associates — they're typically faster for Turkish nurses (4–6 weeks vs CGFNS's 3–5 months). Make sure to request a course-by-course evaluation.</div><div class="ai-indicator"><div class="ai-dot"></div> Answered by AI persona</div><div class="msg-time">Just now</div>`;
+    msgs.appendChild(d);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1200);
+}
+
+function sendChatMsg() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const msgs = document.getElementById('chat-messages');
+  const userMsg = document.createElement('div');
+  userMsg.className = 'msg msg-out';
+  userMsg.innerHTML = `<div class="msg-bubble">${text}</div><div class="msg-time">Just now</div>`;
+  msgs.appendChild(userMsg);
+  input.value = '';
+  const typing = document.createElement('div');
+  typing.className = 'msg msg-in';
+  typing.id = 'typing';
+  typing.innerHTML = `<div class="msg-bubble" style="opacity:0.5;font-style:italic">Thinking...</div>`;
+  msgs.appendChild(typing);
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => {
+    document.getElementById('typing')?.remove();
+    const ai = document.createElement('div');
+    ai.className = 'msg msg-in';
+    ai.innerHTML = `<div class="msg-bubble">Texas and Florida are the most accessible states for Turkish nurses. Texas doesn't require CGFNS certification and the board is responsive to international applicants. I always recommend starting there.</div><div class="ai-indicator"><div class="ai-dot"></div> AI persona response</div><div class="msg-time">Just now</div>`;
+    msgs.appendChild(ai);
+    const src = document.createElement('div');
+    src.className = 'source-card';
+    src.innerHTML = `<div class="source-label">Sources used</div><div class="source-tags"><span class="source-tag">states/texas.md</span><span class="source-tag">expert/gizem-insights.md</span></div>`;
+    msgs.appendChild(src);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1000);
+}
+
+function sendSuggestion(el) {
+  document.getElementById('chat-input').value = el.textContent;
+  sendChatMsg();
+}
+
+function switchMemTab(el, tab) {
+  document.querySelectorAll('.mem-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['mindmap','folders','viewer'].forEach(t => {
+    document.getElementById('mem-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+}
+
+function filterArtifacts() {
+  const search = document.getElementById('artifact-search').value.toLowerCase();
+  const type = document.getElementById('type-filter').value;
+  const date = document.getElementById('date-filter').value;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const rows = document.querySelectorAll('.artifact-row');
+  let visible = 0;
+  rows.forEach(row => {
+    const nameMatch = row.querySelector('.arow-name').textContent.toLowerCase().includes(search);
+    const typeMatch = type === 'all' || row.dataset.type === type;
+    let dateMatch = true;
+    if (date !== 'all') {
+      const rowDate = new Date(row.dataset.date); rowDate.setHours(0,0,0,0);
+      const diff = (today - rowDate) / 86400000;
+      if (date === 'today') dateMatch = diff === 0;
+      else if (date === 'week') dateMatch = diff <= 7;
+      else if (date === 'month') dateMatch = diff <= 30;
+    }
+    const show = nameMatch && typeMatch && dateMatch;
+    row.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+  document.getElementById('artifact-empty').style.display = visible === 0 ? 'block' : 'none';
+}
+
+const artifactContents = {
+  'note': {
+    'Texas board insider tips': `Call the Texas BON directly rather than emailing — they respond within 24 hours by phone but emails can take weeks.\n\nWhen submitting credentials, use a single FedEx envelope with a tracking number. Boards lose documents submitted in batches.\n\nThe nursing education coordinator at TX BON is especially helpful for foreign-trained nurses. Ask specifically for the international desk.\n\nTurkish nursing diplomas sometimes have translation issues with the "clinical hours" section. Use a certified translator who has done medical documents before.`,
+    'Florida vs Texas comparison notes': `Texas:\n- No CGFNS certification required\n- Accepts Josef Silny credential evaluation\n- Fast turnaround (~8 weeks)\n- Large Turkish nurse community in Dallas/Houston\n- Endorsement process straightforward\n\nFlorida:\n- CGFNS certification required\n- Only accepts CGFNS CES evaluation\n- Longer processing (~16 weeks)\n- Good job market in Miami and Orlando\n- Higher cost of living but higher salaries`
+  },
+  'faq': {
+    'Can Turkish nurses skip CGFNS?': {
+      q: 'Can Turkish nurses skip the CGFNS certification process when applying for US nursing licensure?',
+      a: 'It depends on the state. Texas and Florida have different requirements:\n\n• Texas does NOT require CGFNS certification — only a credential evaluation from an approved agency (CGFNS, Josef Silny, or similar).\n\n• Most other states DO require full CGFNS certification or VisaScreen.\n\nMy recommendation: Apply to Texas first. It\'s faster, cheaper, and you can always endorse to other states later. Do not waste 5 months on CGFNS if Texas is your target state.'
+    }
+  }
+};
+
+const typeConfig = {
+  note:      { label: 'Note',           color: '#F59E0B', bg: 'rgba(245,158,11,0.1)' },
+  voice:     { label: 'Voice',          color: '#10B981', bg: 'rgba(16,185,129,0.1)' },
+  video:     { label: 'Video',          color: '#EF4444', bg: 'rgba(239,68,68,0.1)' },
+  document:  { label: 'Document',       color: '#5B8EF0', bg: 'rgba(91,142,240,0.1)' },
+  faq:       { label: 'FAQ',            color: '#8B5CF6', bg: 'rgba(139,92,246,0.1)' },
+  whatsapp:  { label: 'WhatsApp Chat',  color: '#25D366', bg: 'rgba(37,211,102,0.1)' },
+  instagram: { label: 'Instagram Chat', color: '#E1306C', bg: 'rgba(225,48,108,0.1)' },
+};
+
+let audioPlaying = false;
+
+function openArtifact(type, name, date, status) {
+  const cfg = typeConfig[type];
+  document.getElementById('artifact-detail-name').textContent = name;
+  document.getElementById('artifact-detail-date').textContent = date;
+  const badge = document.getElementById('artifact-detail-type-badge');
+  badge.textContent = cfg.label;
+  badge.style.background = cfg.bg;
+  badge.style.color = cfg.color;
+
+  const body = document.getElementById('artifact-detail-body');
+  body.innerHTML = '';
+
+  if (type === 'note') {
+    const content = (artifactContents.note[name]) || 'No content available.';
+    body.innerHTML = `<p class="artifact-viewer-note">${content}</p>
+      <div class="artifact-action-row">
+        <button class="artifact-action-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
+        <button class="artifact-action-btn" style="color:var(--danger);border-color:rgba(239,68,68,0.2)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg> Delete</button>
+      </div>`;
+  } else if (type === 'voice') {
+    const bars = Array.from({length: 40}, (_,i) => {
+      const h = 20 + Math.sin(i * 0.7) * 12 + Math.random() * 16;
+      return `<div class="wave-bar ${i < 14 ? 'played' : ''}" style="height:${h}px"></div>`;
+    }).join('');
+    body.innerHTML = `
+      <div class="audio-player">
+        <div class="waveform">${bars}</div>
+        <div class="audio-controls">
+          <button class="play-btn" id="play-btn" onclick="togglePlay()">
+            <svg id="play-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </button>
+          <div class="audio-progress"><div class="audio-progress-fill" id="audio-progress"></div></div>
+          <div class="audio-time" id="audio-time">4:32</div>
+        </div>
+      </div>
+      <div class="artifact-action-row" style="margin-top:16px">
+        <button class="artifact-action-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download</button>
+        <button class="artifact-action-btn" style="color:var(--danger);border-color:rgba(239,68,68,0.2)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg> Delete</button>
+      </div>`;
+  } else if (type === 'video') {
+    if (status === 'processing') {
+      body.innerHTML = `
+        <div class="video-player">
+          <div style="text-align:center;color:rgba(255,255,255,0.4)">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            <div style="font-size:12px;margin-top:8px">Processing...</div>
+          </div>
+        </div>
+        <div class="processing-banner">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          This video is still being processed. It will be available once transcription and wiki generation are complete.
+        </div>`;
+    } else {
+      body.innerHTML = `
+        <div class="video-player">
+          <div class="video-play-btn"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+        </div>
+        <div class="video-meta">340 MB · 18 min 42 sec · MP4</div>
+        <div class="artifact-action-row">
+          <button class="artifact-action-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download</button>
+          <button class="artifact-action-btn" style="color:var(--danger);border-color:rgba(239,68,68,0.2)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg> Delete</button>
+        </div>`;
+    }
+  } else if (type === 'document') {
+    const isChecklist = name.includes('checklist');
+    body.innerHTML = `
+      <div class="doc-preview">
+        <div class="doc-icon-large">📄</div>
+        <div class="doc-filename">${name}</div>
+        <div class="doc-filesize">${isChecklist ? '1.1 MB · 12 pages · PDF' : '2.4 MB · 84 pages · PDF'}</div>
+      </div>
+      <button class="download-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download file
+      </button>
+      <div class="artifact-action-row">
+        <button class="artifact-action-btn" style="color:var(--danger);border-color:rgba(239,68,68,0.2)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg> Delete</button>
+      </div>`;
+  } else if (type === 'faq') {
+    const data = artifactContents.faq[name] || { q: name, a: 'No answer recorded.' };
+    body.innerHTML = `
+      <div class="faq-q-block">
+        <div class="faq-q-label">Question</div>
+        <div class="faq-q-text">${data.q}</div>
+      </div>
+      <div class="faq-a-block">
+        <div class="faq-a-label">Answer</div>
+        <div class="faq-a-text" style="white-space:pre-line">${data.a}</div>
+      </div>
+      <div class="artifact-action-row">
+        <button class="artifact-action-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
+        <button class="artifact-action-btn" style="color:var(--danger);border-color:rgba(239,68,68,0.2)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg> Delete</button>
+      </div>`;
+  }
+
+  if (type === 'whatsapp' || type === 'instagram') {
+    const isWA = type === 'whatsapp';
+    const color = isWA ? '#25D366' : '#E1306C';
+    const msgs = isWA ? [
+      { dir:'in',  text:'Merhaba! CGFNS olmadan Texas\'a başvurabilir miyim?', time:'14:22' },
+      { dir:'out', text:'Evet! Texas için CGFNS sertifikası zorunlu değil. Josef Silny gibi onaylı bir kurum üzerinden credential evaluation yaptırman yeterli.', time:'14:23' },
+      { dir:'in',  text:'Ne kadar sürer bu süreç?', time:'14:25' },
+      { dir:'out', text:'Josef Silny genellikle 4-6 hafta. CGFNS\'e kıyasla çok daha hızlı. Türk hemşireler için özellikle tavsiye ediyorum.', time:'14:26' },
+      { dir:'in',  text:'Harika, teşekkür ederim! 🙏', time:'14:28' },
+    ] : [
+      { dir:'in',  text:'Hi! I saw your post about nursing in the US 👋', time:'10:02' },
+      { dir:'out', text:'Hello! Yes I help Turkish nurses with US immigration. What stage are you at?', time:'10:04' },
+      { dir:'in',  text:'I just passed my IELTS. Score is 7.0 overall. Is that enough?', time:'10:05' },
+      { dir:'out', text:'That\'s great! 7.0 is accepted by most state boards. Texas and Florida both accept it. You\'re in a good position to start the credential evaluation process now.', time:'10:07' },
+      { dir:'in',  text:'Which state would you recommend for me?', time:'10:09' },
+      { dir:'out', text:'I\'d say Texas first — faster board processing, no CGFNS requirement, and a big Turkish nurse community already there 🇺🇸', time:'10:10' },
+    ];
+
+    const chatHtml = msgs.map(m => `
+      <div style="display:flex;flex-direction:column;align-items:${m.dir==='in'?'flex-start':'flex-end'};margin-bottom:10px">
+        <div style="max-width:80%;padding:9px 13px;border-radius:${m.dir==='in'?'16px 16px 16px 4px':'16px 16px 4px 16px'};background:${m.dir==='in'?'var(--surface)':'rgba('+( isWA?'37,211,102':'225,48,108')+',0.12)'};border:1px solid ${m.dir==='in'?'var(--border)':'rgba('+(isWA?'37,211,102':'225,48,108')+',0.2)'};font-size:13px;color:var(--text);line-height:1.55">${m.text}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:3px;padding:0 4px">${m.time}</div>
+      </div>`).join('');
+
+    body.innerHTML = `
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:50%;background:rgba(${isWA?'37,211,102':'225,48,108'},0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2">${isWA?'<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>':'<rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>'}</svg>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${isWA ? 'Ayşe K.' : 'Merve D.'}</div>
+          <div style="font-size:11px;color:var(--text3)">${msgs.length} messages imported</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column">${chatHtml}</div>
+      <div class="artifact-action-row">
+        <button class="artifact-action-btn" style="color:var(--danger);border-color:rgba(239,68,68,0.2)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg> Delete</button>
+      </div>`;
+  }
+
+  document.getElementById('artifact-detail').classList.add('open');
+}
+
+function closeArtifact() {
+  document.getElementById('artifact-detail').classList.remove('open');
+  audioPlaying = false;
+}
+
+function togglePlay() {
+  audioPlaying = !audioPlaying;
+  const icon = document.getElementById('play-icon');
+  if (icon) icon.outerHTML = audioPlaying
+    ? `<svg id="play-icon" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`
+    : `<svg id="play-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+}
+
+function toggleArtifactPicker() {
+  const picker = document.getElementById('artifact-picker');
+  const btn = document.getElementById('add-artifact-btn');
+  const isOpen = picker.classList.contains('open');
+  picker.classList.toggle('open');
+  btn.innerHTML = isOpen
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add artifact`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cancel`;
+}
+
+function selectArtifactType(el) {
+  const name = el.querySelector('.artifact-type-name').textContent;
+  // Close the picker
+  document.getElementById('artifact-picker').classList.remove('open');
+  document.getElementById('add-artifact-btn').innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add artifact`;
+}
+
+function filterThreads(filter, el) {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+const files = {
+  insights: {
+    path: 'expert/gizem-insights.md',
+    title: 'Gizem — Expert Insights',
+    tags: ['type: expert-profile', 'language: TR+EN', 'updated: 2025-05-03'],
+    sections: [
+      { title: "What official guides don't tell you", type: 'text', content: "State boards often have informal policies not on their websites. Calling directly gets faster results than emailing. Turkish diplomas take 3–4 weeks longer than CGFNS estimates." },
+      { title: 'Common mistakes', type: 'list', items: ['Applying to California first — hardest state for foreign nurses', 'Not starting English proficiency prep early enough', 'Missing VisaScreen requirement until the last stage', 'Underestimating CGFNS processing time'] },
+      { title: 'Cross-references', type: 'links', links: ['[[states/texas]]', '[[processes/cgfns]]', '[[visas/eb-3]]'] },
+    ]
+  },
+  cgfns: {
+    path: 'processes/cgfns-process.md',
+    title: 'CGFNS Certification Process',
+    tags: ['type: process', 'org: CGFNS', 'updated: 2025-04-12'],
+    sections: [
+      { title: 'Summary', type: 'text', content: 'CGFNS International evaluates foreign nursing credentials for US licensure. The Credentials Evaluation Service (CES) is required by most state boards.' },
+      { title: 'Steps', type: 'list', items: ['Create CGFNS account, select CES Professional Report', 'Submit transcripts directly from nursing school', 'Have nursing license verified by home country board', 'Wait 3–5 months for evaluation'] },
+      { title: 'Cross-references', type: 'links', links: ['[[organizations/cgfns]]', '[[visas/eb-3]]', '[[concepts/visascreen]]'] },
+    ]
+  },
+  texas: {
+    path: 'states/texas.md',
+    title: 'Texas — Nursing Licensure',
+    tags: ['type: state', 'board: Texas BON', 'cgfns: not-required'],
+    sections: [
+      { title: 'Summary', type: 'text', content: 'Texas Board of Nursing (BON) is one of the most accessible states for international nurses. CGFNS certification is NOT required — only a credential evaluation.' },
+      { title: 'Expert note (Gizem)', type: 'text', content: 'My top recommendation for Turkish nurses. Culture fit is great, the board is responsive, and there are large Turkish nurse communities in Dallas and Houston.' },
+      { title: 'Cross-references', type: 'links', links: ['[[processes/cgfns]]', '[[concepts/endorsement]]', '[[expert/gizem-insights]]'] },
+    ]
+  },
+  eb3: {
+    path: 'visas/eb-3.md',
+    title: 'EB-3 Visa — Skilled Worker',
+    tags: ['type: visa', 'category: employment-based', 'priority: 3rd'],
+    sections: [
+      { title: 'Summary', type: 'text', content: 'EB-3 is the most common visa route for foreign nurses. Requires a job offer from a US employer willing to sponsor. Processing times vary by nationality.' },
+      { title: 'Timeline', type: 'list', items: ['PERM Labor Certification: 12–18 months', 'I-140 Petition: 3–6 months', 'Priority date wait: 0–24 months (Turkish ~6 months)', 'Consular processing: 2–4 months'] },
+      { title: 'Cross-references', type: 'links', links: ['[[concepts/retrogression]]', '[[concepts/visascreen]]', '[[processes/cgfns]]'] },
+    ]
+  },
+};
+
+function selectFile(el, key) {
+  document.querySelectorAll('.file-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const f = files[key];
+  if (!f) return;
+  let html = `<div class="md-path">${f.path}</div><div class="md-title">${f.title}</div>`;
+  html += `<div class="md-tags">${f.tags.map(t => `<span class="md-tag">${t}</span>`).join('')}</div>`;
+  f.sections.forEach(s => {
+    html += `<div class="md-section"><div class="md-section-title">${s.title}</div>`;
+    if (s.type === 'text') html += `<div class="md-content">${s.content}</div>`;
+    else if (s.type === 'list') html += `<ul class="md-list">${s.items.map(i => `<li>${i}</li>`).join('')}</ul>`;
+    else if (s.type === 'links') html += `<div class="md-content">${s.links.map(l => `<span class="wikilink">${l}</span>`).join(' ')}</div>`;
+    html += '</div>';
+  });
+  document.getElementById('md-content').innerHTML = html;
+}
+
+// Init file viewer
+selectFile(document.querySelector('.file-chip.active'), 'insights');
+
+function toggleAboutEdit() {
+  const panel = document.getElementById('about-collapsible');
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open');
+  const btn = document.getElementById('about-edit-btn');
+  btn.innerHTML = isOpen
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cancel`;
+}
+
+function saveAbout() {
+  const name = document.getElementById('name-input').value.trim();
+  const occupation = document.getElementById('q4-input').value.trim();
+  if (name) document.getElementById('persona-name-display').textContent = name;
+  if (occupation) document.getElementById('persona-role-display').textContent = occupation;
+  document.getElementById('about-collapsible').classList.remove('open');
+  document.getElementById('about-edit-btn').innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit`;
+}
+
+function togglePersonaEdit() {
+  const isEditing = document.getElementById('persona-edit').style.display !== 'none';
+  document.getElementById('persona-view').style.display = isEditing ? 'block' : 'none';
+  document.getElementById('persona-edit').style.display = isEditing ? 'none' : 'block';
+  const btn = document.getElementById('persona-edit-btn');
+  btn.innerHTML = isEditing
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+}
+
+function savePersona() {
+  const name = document.getElementById('persona-name-input').value.trim();
+  const role = document.getElementById('persona-role-input').value.trim();
+  if (name) document.getElementById('persona-name-display').textContent = name;
+  if (role) document.getElementById('persona-role-display').textContent = role;
+  togglePersonaEdit();
+}
+
+function togglePQSection() {
+  const outer = document.getElementById('pq-outer');
+  const btn = document.getElementById('pq-toggle-btn');
+  const isOpen = outer.classList.contains('open');
+  outer.classList.toggle('open');
+  btn.innerHTML = isOpen
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg> Expand`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close`;
+}
+
+function togglePQSub(id) {
+  const sub = document.getElementById('sub-' + id);
+  const chev = document.getElementById('chev-' + id);
+  sub.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+</script>
+</body>
+</html>
