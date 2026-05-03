@@ -58,31 +58,48 @@ body {
   flex-shrink: 0;
   z-index: 10;
 }
-.topbar-logo {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.3px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.topbar-logo-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--accent3);
-  box-shadow: 0 0 6px var(--accent3);
-  animation: pulse 2s infinite;
-}
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-.topbar-avatar {
-  width: 34px; height: 34px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700;
-  color: white;
-  cursor: pointer;
+.topbar-title {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  font-size: 15px; font-weight: 700; letter-spacing: -0.3px;
+  color: var(--text); pointer-events: none;
 }
+.topbar-account-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; transition: all 0.15s;
+  position: relative;
+}
+.topbar-account-btn:active { background: var(--surface3); }
+.topbar-account-btn svg { width: 18px; height: 18px; stroke: var(--text2); }
+
+/* Account dropdown menu */
+.account-menu {
+  position: fixed; top: 56px; right: 20px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow);
+  min-width: 160px; z-index: 50; overflow: hidden;
+  transform: scale(0.95) translateY(-6px);
+  opacity: 0; pointer-events: none;
+  transition: all 0.18s cubic-bezier(0.4,0,0.2,1);
+  transform-origin: top right;
+}
+.account-menu.open {
+  transform: scale(1) translateY(0);
+  opacity: 1; pointer-events: all;
+}
+.account-menu-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; cursor: pointer;
+  font-size: 14px; color: var(--text);
+  transition: background 0.12s;
+}
+.account-menu-item:active { background: var(--surface2); }
+.account-menu-item svg { width: 16px; height: 16px; stroke: var(--text3); flex-shrink: 0; }
+.account-menu-item.danger { color: var(--danger); }
+.account-menu-item.danger svg { stroke: var(--danger); }
+.account-menu-divider { height: 1px; background: var(--border); margin: 2px 0; }
 
 /* PAGES */
 .pages { flex: 1; overflow: hidden; position: relative; }
@@ -807,11 +824,31 @@ body {
 <body>
 
 <!-- TOP BAR -->
-<div class="topbar">
+<div class="topbar" style="position:relative">
   <button class="topbar-add-btn" onclick="openArtifactDrawer()">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </button>
-  <div class="topbar-avatar">G</div>
+  <div class="topbar-title">PersonAI</div>
+  <button class="topbar-account-btn" onclick="toggleAccountMenu()">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  </button>
+</div>
+
+<!-- ACCOUNT MENU -->
+<div class="account-menu" id="account-menu">
+  <div class="account-menu-item" onclick="closeAccountMenu()">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Dashboard
+  </div>
+  <div class="account-menu-item" onclick="closeAccountMenu()">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    Language
+  </div>
+  <div class="account-menu-divider"></div>
+  <div class="account-menu-item danger" onclick="closeAccountMenu()">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Logout
+  </div>
 </div>
 
 <!-- PAGES -->
@@ -1934,11 +1971,28 @@ function togglePlay() {
 
 function openArtifactDrawer() {
   document.getElementById('artifact-drawer').classList.add('open');
+  closeAccountMenu();
 }
 
 function closeArtifactDrawer() {
   document.getElementById('artifact-drawer').classList.remove('open');
 }
+
+function toggleAccountMenu() {
+  document.getElementById('account-menu').classList.toggle('open');
+}
+
+function closeAccountMenu() {
+  document.getElementById('account-menu').classList.remove('open');
+}
+
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('account-menu');
+  const btn = document.querySelector('.topbar-account-btn');
+  if (menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+    closeAccountMenu();
+  }
+});
 
 function selectArtifactType(el) {
   closeArtifactDrawer();
