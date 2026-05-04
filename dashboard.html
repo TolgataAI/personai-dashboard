@@ -1177,7 +1177,7 @@ body {
         <div class="card-label" style="margin-bottom:0">Training material</div>
         <button class="add-artifact-btn" onclick="openArtifactDrawer()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add artifact
+          Add Memory
         </button>
       </div>
 
@@ -1185,7 +1185,7 @@ body {
       <div class="artifact-filters">
         <div class="artifact-search">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="artifact-search" placeholder="Search artifacts..." oninput="filterArtifacts()">
+          <input type="text" id="artifact-search" placeholder="Search memories..." oninput="filterArtifacts()">
         </div>
         <div class="artifact-filter-row">
           <select class="date-filter" id="type-filter" onchange="filterArtifacts()" style="flex:1">
@@ -1299,7 +1299,7 @@ body {
           </div>
           <div class="artifact-status status-done">Ready</div>
         </div>
-        <div id="artifact-empty" style="display:none;padding:20px 0;text-align:center;font-size:13px;color:var(--text3)">No artifacts match your filters</div>
+        <div id="artifact-empty" style="display:none;padding:20px 0;text-align:center;font-size:13px;color:var(--text3)">No memories match your filters</div>
       </div>
     </div>
 
@@ -1601,7 +1601,7 @@ body {
   <div class="drawer-backdrop" onclick="closeArtifactDrawer()"></div>
   <div class="drawer-panel">
     <div class="drawer-header">
-      <div class="drawer-title">Add Artifact</div>
+      <div class="drawer-title">Add Memory</div>
       <button class="back-btn" onclick="closeArtifactDrawer()">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -2149,7 +2149,7 @@ function toggleRecording() {
 }
 
 function buildFormHTML(typeName) {
-  const titleField = `<div class="form-field"><div class="form-label">Title</div><input class="form-input" placeholder="Give this artifact a title..."></div>`;
+  const titleField = `<div class="form-field"><div class="form-label">Title</div><input class="form-input" placeholder="Give this memory a title..."></div>`;
 
   if (typeName === 'Note') {
     return titleField + `
