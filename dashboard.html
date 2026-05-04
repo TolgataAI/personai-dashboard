@@ -123,8 +123,8 @@ body {
   padding-bottom: var(--safe-bottom);
   display: flex;
   align-items: center;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
+  background: var(--accent);
+  border-top: none;
   flex-shrink: 0;
   z-index: 10;
 }
@@ -134,13 +134,18 @@ body {
   align-items: center; gap: 4px;
   cursor: pointer; padding: 8px 4px;
   transition: all 0.2s; position: relative;
+  border-radius: 12px;
+  margin: 6px 4px;
+}
+.nav-item.active {
+  background: rgba(255,255,255,0.22);
 }
 .nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; position: relative; }
 .nav-icon svg { width: 22px; height: 22px; }
-.nav-label { font-size: 10px; font-weight: 500; color: var(--text3); transition: color 0.2s; letter-spacing: 0.3px; }
-.nav-item.active .nav-label { color: var(--accent); }
-.nav-item.active .nav-icon svg { stroke: var(--accent); }
-.nav-item:not(.active) .nav-icon svg { stroke: var(--text3); }
+.nav-label { font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.7); transition: color 0.2s; letter-spacing: 0.3px; }
+.nav-item.active .nav-label { color: white; font-weight: 600; }
+.nav-item.active .nav-icon svg { stroke: white; }
+.nav-item:not(.active) .nav-icon svg { stroke: rgba(255,255,255,0.7); }
 .nav-badge {
   position: absolute; top: -2px; right: -4px;
   min-width: 16px; height: 16px;
