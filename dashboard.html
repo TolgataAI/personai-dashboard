@@ -1849,7 +1849,7 @@ function openThread(name, initials, color, online) {
     const d = document.createElement('div');
     d.className = 'msg msg-' + m.dir + (m.ai ? ' ai-msg' : '');
     if (m.template && !autoApprove) {
-      d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button><button class="ai-action-btn ai-action-discard" onclick="discardMsg(this)">Discard</button></div><div class="ai-indicator"><div class="ai-dot"></div> Template by AI</div><div class="msg-time">${m.time}</div>`;
+      d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button></div><div class="ai-indicator"><div class="ai-dot"></div> Template by AI</div><div class="msg-time">${m.time}</div>`;
     } else {
       d.innerHTML = `<div class="msg-bubble">${m.text}</div>${m.ai ? '<div class="ai-indicator"><div class="ai-dot"></div> Answered by AI</div>' : ''}<div class="msg-time">${m.time}</div>`;
     }
@@ -1899,7 +1899,7 @@ function triggerAIReply() {
       d.innerHTML = `<div class="msg-bubble">${replyText}</div><div class="ai-indicator"><div class="ai-dot"></div> Answered by AI</div><div class="msg-time">Just now</div>`;
       setInputLocked(true);
     } else {
-      d.innerHTML = `<div class="msg-bubble">${replyText}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button><button class="ai-action-btn ai-action-discard" onclick="discardMsg(this)">Discard</button></div><div class="ai-indicator"><div class="ai-dot"></div> Template by AI</div><div class="msg-time">Just now</div>`;
+      d.innerHTML = `<div class="msg-bubble">${replyText}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button></div><div class="ai-indicator"><div class="ai-dot"></div> Template by AI</div><div class="msg-time">Just now</div>`;
     }
     msgs.appendChild(d);
     msgs.scrollTop = msgs.scrollHeight;
@@ -1917,52 +1917,11 @@ function approveMsg(btn) {
 }
 
 function editMsg(btn) {
-  const msgDiv = btn.closest('.msg');
-  const bubble = msgDiv.querySelector('.msg-bubble');
-  const templateActions = msgDiv.querySelector('.ai-template-actions');
-  const indicator = msgDiv.querySelector('.ai-indicator');
-  msgDiv.dataset.originalText = bubble.textContent;
-  bubble.style.display = 'none';
-  templateActions.style.display = 'none';
-  indicator.style.display = 'none';
-  const textarea = document.createElement('textarea');
-  textarea.className = 'msg-edit-textarea';
-  textarea.value = msgDiv.dataset.originalText;
-  msgDiv.insertBefore(textarea, bubble);
-  const editActions = document.createElement('div');
-  editActions.className = 'ai-edit-actions';
-  editActions.innerHTML = `<button class="ai-action-btn ai-edit-send" onclick="sendEdit(this)">Send</button><button class="ai-action-btn ai-edit-cancel" onclick="cancelEdit(this)">Cancel</button><button class="ai-action-btn ai-edit-clear" onclick="clearEdit(this)">Clear</button>`;
-  msgDiv.insertBefore(editActions, bubble);
-}
-
-function sendEdit(btn) {
-  const msgDiv = btn.closest('.msg');
-  const textarea = msgDiv.querySelector('.msg-edit-textarea');
-  const editActions = msgDiv.querySelector('.ai-edit-actions');
-  const bubble = msgDiv.querySelector('.msg-bubble');
-  const indicator = msgDiv.querySelector('.ai-indicator');
-  bubble.textContent = textarea.value;
-  bubble.style.display = '';
-  textarea.remove();
-  editActions.remove();
-  msgDiv.classList.add('msg-approved');
-  indicator.style.display = '';
-  indicator.className = 'ai-approved-label';
-  indicator.innerHTML = '<div class="ai-dot" style="background:#10B981"></div> Approved';
-  setInputLocked(true);
-}
-
-function cancelEdit(btn) {
-  const msgDiv = btn.closest('.msg');
-  msgDiv.querySelector('.msg-edit-textarea').remove();
-  msgDiv.querySelector('.ai-edit-actions').remove();
-  msgDiv.querySelector('.msg-bubble').style.display = '';
-  msgDiv.querySelector('.ai-template-actions').style.display = '';
-  msgDiv.querySelector('.ai-indicator').style.display = '';
-}
-
-function clearEdit(btn) {
-  btn.closest('.msg').querySelector('.msg-edit-textarea').value = '';
+  const text = btn.closest('.msg').querySelector('.msg-bubble').textContent;
+  const input = document.getElementById('detail-input');
+  input.value = text;
+  input.focus();
+  setInputLocked(false);
 }
 
 function discardMsg(btn) {
