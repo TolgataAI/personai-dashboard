@@ -106,6 +106,43 @@ body {
 .account-menu-item.danger svg { stroke: var(--danger); }
 .account-menu-divider { height: 1px; background: var(--border); margin: 2px 0; }
 
+/* Language modal */
+.lang-modal-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 300;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.lang-modal-backdrop.open { opacity: 1; pointer-events: all; }
+.lang-modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  width: 260px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transform: scale(0.94);
+  transition: transform 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+.lang-modal-backdrop.open .lang-modal { transform: scale(1); }
+.lang-modal-title {
+  font-size: 13px; font-weight: 700; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.6px;
+  padding: 16px 16px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.lang-option {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; cursor: pointer;
+  font-size: 15px; font-weight: 500; color: var(--text);
+  transition: background 0.12s;
+}
+.lang-option:active { background: var(--surface2); }
+.lang-option.selected { color: var(--accent); }
+.lang-option-check { width: 18px; height: 18px; stroke: var(--accent); display: none; }
+.lang-option.selected .lang-option-check { display: block; }
+
 /* PAGES */
 .pages { flex: 1; overflow: hidden; position: relative; }
 .page {
@@ -986,7 +1023,7 @@ body {
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
     Dashboard
   </div>
-  <div class="account-menu-item" onclick="closeAccountMenu()">
+  <div class="account-menu-item" onclick="openLangModal()">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
     Language
   </div>
@@ -1658,6 +1695,21 @@ body {
   <div class="detail-messages" id="artifact-detail-body" style="padding:20px;gap:0"></div>
 </div>
 
+<!-- LANGUAGE MODAL -->
+<div class="lang-modal-backdrop" id="lang-modal" onclick="handleLangBackdropClick(event)">
+  <div class="lang-modal">
+    <div class="lang-modal-title">Select Language</div>
+    <div class="lang-option selected" id="lang-en" onclick="selectLang('en')">
+      <span>English</span>
+      <svg class="lang-option-check" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="lang-option" id="lang-tr" onclick="selectLang('tr')">
+      <span>Turkish</span>
+      <svg class="lang-option-check" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+  </div>
+</div>
+
 <!-- ARTIFACT DRAWER -->
 <div class="artifact-drawer" id="artifact-drawer">
   <div class="drawer-backdrop" onclick="closeArtifactDrawer()"></div>
@@ -2259,6 +2311,24 @@ function toggleAccountMenu() {
 
 function closeAccountMenu() {
   document.getElementById('account-menu').classList.remove('open');
+}
+
+let currentLang = 'en';
+function openLangModal() {
+  closeAccountMenu();
+  document.getElementById('lang-modal').classList.add('open');
+}
+function closeLangModal() {
+  document.getElementById('lang-modal').classList.remove('open');
+}
+function handleLangBackdropClick(e) {
+  if (e.target === document.getElementById('lang-modal')) closeLangModal();
+}
+function selectLang(lang) {
+  currentLang = lang;
+  document.getElementById('lang-en').classList.toggle('selected', lang === 'en');
+  document.getElementById('lang-tr').classList.toggle('selected', lang === 'tr');
+  closeLangModal();
 }
 
 document.addEventListener('click', function(e) {
