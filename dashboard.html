@@ -1786,6 +1786,7 @@ const threadData = {
     { dir:'in', text:'Is IELTS accepted by all US state nursing boards?', time:'May 4, 2026 · 3:15 PM' },
     { dir:'out', ai:true, text:'Most state boards accept IELTS Academic with a minimum overall band of 6.5 and no component below 6.0. Some states also accept TOEFL or OET.', time:'May 4, 2026 · 3:15 PM' },
     { dir:'in', text:'Thank you so much for the help! 🙏', time:'May 5, 2026 · 9:02 AM' },
+    { dir:'out', ai:true, template:true, text:"You're very welcome! Feel free to reach out anytime — I'm happy to help you navigate the process. Best of luck with your nursing journey! 🌟", time:'May 5, 2026 · 9:03 AM' },
   ],
   'Merve D.': [
     { dir:'in', text:'How long does EB-3 visa processing take?', time:'May 5, 2026 · 7:30 AM' },
@@ -1794,6 +1795,7 @@ const threadData = {
     { dir:'in', text:'My credential evaluation was rejected...', time:'May 4, 2026 · 11:20 AM' },
     { dir:'out', ai:true, text:"I'm sorry to hear that. What reason did CGFNS give for the rejection?", time:'May 4, 2026 · 11:21 AM' },
     { dir:'in', text:"CGFNS said my nursing school hours don't meet requirements. What should I do?", time:'May 4, 2026 · 11:22 AM' },
+    { dir:'out', ai:true, template:true, text:"This is more common than you'd think. First, request your full evaluation report from CGFNS — it will list exactly which hours are short. Then contact your nursing school to see if supplemental transcripts or a letter of explanation can be provided. Some schools have clinical hours recorded separately that CGFNS may not have received.", time:'May 4, 2026 · 11:23 AM' },
   ],
   'Selin T.': [
     { dir:'in', text:'Which English test is accepted in California?', time:'May 3, 2026 · 2:45 PM' },
@@ -1801,15 +1803,26 @@ const threadData = {
   ],
 };
 
-function toggleAutoApprove() {
+const threadAutoApprove = {
+  'Ayşe K.':  true,
+  'Fatma Y.': false,
+  'Merve D.': true,
+  'Zeynep A.': false,
+  'Selin T.': true,
+};
+
+function setAutoApproveToggle(on) {
   const btn = document.getElementById('auto-approve-btn');
-  const isOn = btn.classList.contains('on');
-  btn.classList.toggle('on', !isOn);
-  btn.classList.toggle('off', isOn);
-  document.getElementById('auto-approve-label').textContent = isOn ? 'Auto Approve Off' : 'Auto Approve';
-  document.getElementById('auto-approve-icon').innerHTML = isOn
-    ? '<rect x="1" y="6" width="22" height="12" rx="6"/><circle cx="8" cy="12" r="4" fill="currentColor" stroke="none"/>'
-    : '<rect x="1" y="6" width="22" height="12" rx="6"/><circle cx="16" cy="12" r="4" fill="currentColor" stroke="none"/>';
+  btn.classList.toggle('on', on);
+  btn.classList.toggle('off', !on);
+  document.getElementById('auto-approve-label').textContent = on ? 'Auto Approve' : 'Auto Approve Off';
+  document.getElementById('auto-approve-icon').innerHTML = on
+    ? '<rect x="1" y="6" width="22" height="12" rx="6"/><circle cx="16" cy="12" r="4" fill="currentColor" stroke="none"/>'
+    : '<rect x="1" y="6" width="22" height="12" rx="6"/><circle cx="8" cy="12" r="4" fill="currentColor" stroke="none"/>';
+}
+
+function toggleAutoApprove() {
+  setAutoApproveToggle(!isAutoApprove());
 }
 
 function setInputLocked(locked) {
@@ -1826,18 +1839,25 @@ function openThread(name, initials, color, online) {
   av.style.background = color + '22';
   av.style.color = color;
 
+  const autoApprove = threadAutoApprove[name] !== false;
+  setAutoApproveToggle(autoApprove);
+
   const msgs = document.getElementById('detail-messages');
   msgs.innerHTML = '';
   const messages = threadData[name] || [];
   messages.forEach(m => {
     const d = document.createElement('div');
     d.className = 'msg msg-' + m.dir + (m.ai ? ' ai-msg' : '');
-    d.innerHTML = `<div class="msg-bubble">${m.text}</div>${m.ai ? '<div class="ai-indicator"><div class="ai-dot"></div> Answered by AI</div>' : ''}<div class="msg-time">${m.time}</div>`;
+    if (m.template && !autoApprove) {
+      d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button><button class="ai-action-btn ai-action-discard" onclick="discardMsg(this)">Discard</button></div><div class="ai-indicator"><div class="ai-dot"></div> Template by AI</div><div class="msg-time">${m.time}</div>`;
+    } else {
+      d.innerHTML = `<div class="msg-bubble">${m.text}</div>${m.ai ? '<div class="ai-indicator"><div class="ai-dot"></div> Answered by AI</div>' : ''}<div class="msg-time">${m.time}</div>`;
+    }
     msgs.appendChild(d);
   });
   msgs.scrollTop = msgs.scrollHeight;
   const lastMsg = messages[messages.length - 1];
-  setInputLocked(lastMsg && lastMsg.dir === 'out');
+  setInputLocked(lastMsg && lastMsg.dir === 'out' && !lastMsg.template);
   document.getElementById('inbox-detail').classList.add('open');
 }
 
