@@ -1868,7 +1868,7 @@ function sendDetailMsg() {
   const msgs = document.getElementById('detail-messages');
   const d = document.createElement('div');
   d.className = 'msg msg-out';
-  d.innerHTML = `<div class="msg-bubble">${text}</div><div class="ai-approved-label"><div class="ai-dot" style="background:var(--accent)"></div> Edited by You</div><div class="msg-time">Just now</div>`;
+  d.innerHTML = `<div class="msg-bubble">${text}</div><div class="ai-approved-label" style="color:var(--accent)"><div class="ai-dot" style="background:var(--accent)"></div> Edited by You</div><div class="msg-time">Just now</div>`;
   msgs.appendChild(d);
   msgs.scrollTop = msgs.scrollHeight;
   input.value = '';
