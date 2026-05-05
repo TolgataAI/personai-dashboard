@@ -1899,17 +1899,20 @@ function sendDetailMsg() {
   const text = input.value.trim();
   if (!text) return;
   const msgs = document.getElementById('detail-messages');
+  const editing = document.querySelector('.msg[data-editing]');
+  const label = editing ? 'Answered by edit' : 'Answered by you';
   const d = document.createElement('div');
   d.className = 'msg msg-out';
-  d.innerHTML = `<div class="msg-bubble" style="background:#10B981">${text}</div><div class="ai-approved-label"><div class="ai-dot" style="background:#10B981"></div> Answered by edit</div><div class="msg-time">Just now</div>`;
+  d.innerHTML = `<div class="msg-bubble" style="background:#10B981">${text}</div><div class="ai-approved-label"><div class="ai-dot" style="background:#10B981"></div> ${label}</div><div class="msg-time">Just now</div>`;
   msgs.appendChild(d);
   msgs.scrollTop = msgs.scrollHeight;
   input.value = '';
-  const editing = document.querySelector('.msg[data-editing]');
   if (editing) {
     const actions = editing.querySelector('.ai-template-actions');
     if (actions) actions.remove();
     delete editing.dataset.editing;
+  } else {
+    document.querySelectorAll('#detail-messages .ai-template-actions').forEach(el => el.remove());
   }
   setInputLocked(true);
 }
