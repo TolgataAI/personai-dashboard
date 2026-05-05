@@ -1872,6 +1872,12 @@ function sendDetailMsg() {
   msgs.appendChild(d);
   msgs.scrollTop = msgs.scrollHeight;
   input.value = '';
+  const editing = document.querySelector('.msg[data-editing]');
+  if (editing) {
+    const actions = editing.querySelector('.ai-template-actions');
+    if (actions) actions.remove();
+    delete editing.dataset.editing;
+  }
   setInputLocked(true);
 }
 
@@ -1913,9 +1919,11 @@ function approveMsg(btn) {
 }
 
 function editMsg(btn) {
-  const text = btn.closest('.msg').querySelector('.msg-bubble').textContent;
+  const msgDiv = btn.closest('.msg');
+  document.querySelectorAll('.msg[data-editing]').forEach(el => delete el.dataset.editing);
+  msgDiv.dataset.editing = 'true';
   const input = document.getElementById('detail-input');
-  input.value = text;
+  input.value = msgDiv.querySelector('.msg-bubble').textContent;
   input.focus();
   setInputLocked(false);
 }
