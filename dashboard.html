@@ -405,6 +405,18 @@ body {
 .msg-out .msg-time { text-align: right; }
 .ai-indicator { font-size: 10px; color: var(--accent2); margin-top: 3px; padding: 0 4px; display: flex; align-items: center; gap: 4px; }
 .ai-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent2); flex-shrink: 0; }
+.ai-template-actions { display: flex; gap: 6px; margin-top: 8px; padding: 0 2px; }
+.ai-action-btn { font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 6px; border: 1px solid; cursor: pointer; font-family: var(--font); }
+.ai-action-approve { color: #10B981; border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.08); }
+.ai-action-edit { color: var(--accent); border-color: rgba(91,142,240,0.3); background: rgba(91,142,240,0.08); }
+.ai-action-discard { color: var(--danger); border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.06); }
+.msg-approved .msg-bubble { background: #10B981 !important; }
+.ai-approved-label { font-size: 10px; color: #10B981; margin-top: 3px; padding: 0 4px; display: flex; align-items: center; gap: 4px; }
+.msg-edit-textarea { width: 100%; border: 1px solid rgba(91,142,240,0.4); border-radius: 12px; padding: 10px 14px; font-size: 14px; line-height: 1.55; font-family: var(--font); resize: none; outline: none; background: white; min-height: 80px; }
+.ai-edit-actions { display: flex; gap: 6px; margin-top: 8px; padding: 0 2px; }
+.ai-edit-send { color: #10B981; border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.08); }
+.ai-edit-cancel { color: var(--text3); border-color: var(--border); background: none; }
+.ai-edit-clear { color: var(--danger); border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.06); }
 
 .detail-input-wrap {
   padding: 10px 16px; padding-bottom: calc(10px + var(--safe-bottom));
@@ -1820,7 +1832,7 @@ function openThread(name, initials, color, online) {
   messages.forEach(m => {
     const d = document.createElement('div');
     d.className = 'msg msg-' + m.dir + (m.ai ? ' ai-msg' : '');
-    d.innerHTML = `<div class="msg-bubble">${m.text}</div>${m.ai ? '<div class="ai-indicator"><div class="ai-dot"></div> Answered by AI persona</div>' : ''}<div class="msg-time">${m.time}</div>`;
+    d.innerHTML = `<div class="msg-bubble">${m.text}</div>${m.ai ? '<div class="ai-indicator"><div class="ai-dot"></div> Answered by AI</div>' : ''}<div class="msg-time">${m.time}</div>`;
     msgs.appendChild(d);
   });
   msgs.scrollTop = msgs.scrollHeight;
@@ -1847,6 +1859,10 @@ function sendDetailMsg() {
   setInputLocked(true);
 }
 
+function isAutoApprove() {
+  return document.getElementById('auto-approve-btn').classList.contains('on');
+}
+
 function triggerAIReply() {
   const msgs = document.getElementById('detail-messages');
   const typing = document.createElement('div');
@@ -1854,15 +1870,83 @@ function triggerAIReply() {
   typing.innerHTML = `<div class="msg-bubble" style="opacity:0.5;font-style:italic">AI is composing...</div>`;
   msgs.appendChild(typing);
   msgs.scrollTop = msgs.scrollHeight;
+  const replyText = "For credential evaluation, I'd recommend Josef Silny & Associates — they're typically faster for Turkish nurses (4–6 weeks vs CGFNS's 3–5 months). Make sure to request a course-by-course evaluation.";
   setTimeout(() => {
     typing.remove();
     const d = document.createElement('div');
     d.className = 'msg msg-out ai-msg';
-    d.innerHTML = `<div class="msg-bubble">For credential evaluation, I'd recommend Josef Silny & Associates — they're typically faster for Turkish nurses (4–6 weeks vs CGFNS's 3–5 months). Make sure to request a course-by-course evaluation.</div><div class="ai-indicator"><div class="ai-dot"></div> Answered by AI persona</div><div class="msg-time">Just now</div>`;
+    if (isAutoApprove()) {
+      d.innerHTML = `<div class="msg-bubble">${replyText}</div><div class="ai-indicator"><div class="ai-dot"></div> Answered by AI</div><div class="msg-time">Just now</div>`;
+      setInputLocked(true);
+    } else {
+      d.innerHTML = `<div class="msg-bubble">${replyText}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button><button class="ai-action-btn ai-action-discard" onclick="discardMsg(this)">Discard</button></div><div class="ai-indicator"><div class="ai-dot"></div> Template by AI</div><div class="msg-time">Just now</div>`;
+    }
     msgs.appendChild(d);
     msgs.scrollTop = msgs.scrollHeight;
-    setInputLocked(true);
   }, 1200);
+}
+
+function approveMsg(btn) {
+  const msgDiv = btn.closest('.msg');
+  msgDiv.classList.add('msg-approved');
+  msgDiv.querySelector('.ai-template-actions').remove();
+  const ind = msgDiv.querySelector('.ai-indicator');
+  ind.className = 'ai-approved-label';
+  ind.innerHTML = '<div class="ai-dot" style="background:#10B981"></div> Approved';
+  setInputLocked(true);
+}
+
+function editMsg(btn) {
+  const msgDiv = btn.closest('.msg');
+  const bubble = msgDiv.querySelector('.msg-bubble');
+  const templateActions = msgDiv.querySelector('.ai-template-actions');
+  const indicator = msgDiv.querySelector('.ai-indicator');
+  msgDiv.dataset.originalText = bubble.textContent;
+  bubble.style.display = 'none';
+  templateActions.style.display = 'none';
+  indicator.style.display = 'none';
+  const textarea = document.createElement('textarea');
+  textarea.className = 'msg-edit-textarea';
+  textarea.value = msgDiv.dataset.originalText;
+  msgDiv.insertBefore(textarea, bubble);
+  const editActions = document.createElement('div');
+  editActions.className = 'ai-edit-actions';
+  editActions.innerHTML = `<button class="ai-action-btn ai-edit-send" onclick="sendEdit(this)">Send</button><button class="ai-action-btn ai-edit-cancel" onclick="cancelEdit(this)">Cancel</button><button class="ai-action-btn ai-edit-clear" onclick="clearEdit(this)">Clear</button>`;
+  msgDiv.insertBefore(editActions, bubble);
+}
+
+function sendEdit(btn) {
+  const msgDiv = btn.closest('.msg');
+  const textarea = msgDiv.querySelector('.msg-edit-textarea');
+  const editActions = msgDiv.querySelector('.ai-edit-actions');
+  const bubble = msgDiv.querySelector('.msg-bubble');
+  const indicator = msgDiv.querySelector('.ai-indicator');
+  bubble.textContent = textarea.value;
+  bubble.style.display = '';
+  textarea.remove();
+  editActions.remove();
+  msgDiv.classList.add('msg-approved');
+  indicator.style.display = '';
+  indicator.className = 'ai-approved-label';
+  indicator.innerHTML = '<div class="ai-dot" style="background:#10B981"></div> Approved';
+  setInputLocked(true);
+}
+
+function cancelEdit(btn) {
+  const msgDiv = btn.closest('.msg');
+  msgDiv.querySelector('.msg-edit-textarea').remove();
+  msgDiv.querySelector('.ai-edit-actions').remove();
+  msgDiv.querySelector('.msg-bubble').style.display = '';
+  msgDiv.querySelector('.ai-template-actions').style.display = '';
+  msgDiv.querySelector('.ai-indicator').style.display = '';
+}
+
+function clearEdit(btn) {
+  btn.closest('.msg').querySelector('.msg-edit-textarea').value = '';
+}
+
+function discardMsg(btn) {
+  btn.closest('.msg').remove();
 }
 
 function sendChatMsg() {
