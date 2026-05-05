@@ -401,6 +401,7 @@ body {
 }
 .msg-out .msg-bubble { background: var(--accent); border-bottom-right-radius: 4px; color: white; }
 .msg-out.ai-msg .msg-bubble { background: var(--accent2); }
+.msg-out.ai-answered .msg-bubble { background: #B89CF7; }
 .msg-time { font-size: 10px; color: var(--text3); margin-top: 4px; padding: 0 4px; }
 .msg-out .msg-time { text-align: right; }
 .ai-indicator { font-size: 10px; color: var(--accent2); margin-top: 3px; padding: 0 4px; display: flex; align-items: center; gap: 4px; }
@@ -1843,7 +1844,7 @@ function openThread(name, initials, color, online) {
   const messages = threadData[name] || [];
   messages.forEach(m => {
     const d = document.createElement('div');
-    d.className = 'msg msg-' + m.dir + (m.ai ? ' ai-msg' : '');
+    d.className = 'msg msg-' + m.dir + (m.ai ? (m.template ? ' ai-msg' : ' ai-answered') : '');
     if (m.template && !autoApprove) {
       d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button></div><div class="ai-indicator"><div class="ai-dot"></div> Template by AI</div><div class="msg-time">${m.time}</div>`;
     } else {
@@ -1896,11 +1897,12 @@ function triggerAIReply() {
   setTimeout(() => {
     typing.remove();
     const d = document.createElement('div');
-    d.className = 'msg msg-out ai-msg';
     if (isAutoApprove()) {
+      d.className = 'msg msg-out ai-answered';
       d.innerHTML = `<div class="msg-bubble">${replyText}</div><div class="ai-indicator"><div class="ai-dot"></div> Answered by AI</div><div class="msg-time">Just now</div>`;
       setInputLocked(true);
     } else {
+      d.className = 'msg msg-out ai-msg';
       d.innerHTML = `<div class="msg-bubble">${replyText}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button></div><div class="ai-indicator"><div class="ai-dot"></div> Template by AI</div><div class="msg-time">Just now</div>`;
     }
     msgs.appendChild(d);
