@@ -2331,8 +2331,8 @@ function toggleRecording() {
 }
 
 function buildFormHTML(typeName) {
-  const titleField = `<div class="form-field"><div class="form-label">Title</div><input class="form-input" placeholder="Give this memory a title..."></div>`;
   const myStyle = `<div class="my-style-row"><input type="checkbox" id="my-style-check" checked><label for="my-style-check">My Style</label></div>`;
+  const titleField = `<div class="form-field"><div class="form-label">Title</div><input class="form-input" placeholder="Give this memory a title..."></div>${myStyle}`;
 
   if (typeName === 'Note') {
     return titleField + `
@@ -2340,7 +2340,7 @@ function buildFormHTML(typeName) {
         <div class="form-label">Content</div>
         <textarea class="form-textarea" rows="9" placeholder="Write your note here..."></textarea>
       </div>
-      ${myStyle}<button class="add-btn" onclick="saveArtifactForm()">Save Note</button>`;
+      <button class="add-btn" onclick="saveArtifactForm()">Save Note</button>`;
   }
 
   if (typeName === 'Voice') {
@@ -2368,7 +2368,7 @@ function buildFormHTML(typeName) {
           </div>
         </div>
       </div>
-      ${myStyle}<button class="add-btn" onclick="saveArtifactForm()">Save Voice</button>`;
+      <button class="add-btn" onclick="saveArtifactForm()">Save Voice</button>`;
   }
 
   if (typeName === 'Video') {
@@ -2396,7 +2396,7 @@ function buildFormHTML(typeName) {
           </div>
         </div>
       </div>
-      ${myStyle}<button class="add-btn" onclick="saveArtifactForm()">Save Video</button>`;
+      <button class="add-btn" onclick="saveArtifactForm()">Save Video</button>`;
   }
 
   if (typeName === 'Document') {
@@ -2408,7 +2408,7 @@ function buildFormHTML(typeName) {
           Tap to select a document<br><span style="font-size:11px">PDF, Word, TXT</span>
         </div>
       </div>
-      ${myStyle}<button class="add-btn" onclick="saveArtifactForm()">Save Document</button>`;
+      <button class="add-btn" onclick="saveArtifactForm()">Save Document</button>`;
   }
 
   if (typeName === 'FAQ') {
@@ -2421,10 +2421,10 @@ function buildFormHTML(typeName) {
         <div class="form-label">Answer</div>
         <textarea class="form-textarea" rows="5" placeholder="Your answer..."></textarea>
       </div>
-      ${myStyle}<button class="add-btn" onclick="saveArtifactForm()">Save FAQ</button>`;
+      <button class="add-btn" onclick="saveArtifactForm()">Save FAQ</button>`;
   }
 
-  return titleField + myStyle + `<button class="add-btn" onclick="saveArtifactForm()">Save</button>`;
+  return titleField + `<button class="add-btn" onclick="saveArtifactForm()">Save</button>`;
 }
 
 function refreshInbox() {
