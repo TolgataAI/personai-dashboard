@@ -1348,8 +1348,8 @@ body {
     </div>
 
     <div class="filter-pills">
-      <div class="pill active" onclick="filterThreads('all',this)">All <span class="pill-count">5</span></div>
-      <div class="pill" onclick="filterThreads('unread',this)">Needs you <span class="pill-count">2</span></div>
+      <div class="pill active" onclick="filterThreads('all',this)">All <span class="pill-count">6</span></div>
+      <div class="pill" onclick="filterThreads('unread',this)">Needs you <span class="pill-count">3</span></div>
       <div class="pill" onclick="filterThreads('ai',this)">AI handled <span class="pill-count">3</span></div>
     </div>
 
@@ -1372,6 +1372,17 @@ body {
           <div class="thread-phone">+1 (773) 842-0194</div>
           <div class="thread-preview-row">
             <div class="thread-preview">Thank you so much for the help! 🙏</div>
+            <div class="needs-you-badge">Needs you</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-thread" data-status="unread" onclick="openThread('Tolga T.','TT','#06B6D4',false)">
+        <div class="thread-avatar" style="background:rgba(6,182,212,0.15);color:#06B6D4">TT</div>
+        <div class="thread-info">
+          <div class="thread-top"><div class="thread-name">Tolga T.</div><div class="thread-time">2h ago</div></div>
+          <div class="thread-phone">+1 (312) 445-7823</div>
+          <div class="thread-preview-row">
+            <div class="thread-preview">Can I work while my EB-3 is pending?</div>
             <div class="needs-you-badge">Needs you</div>
           </div>
         </div>
@@ -1766,6 +1777,7 @@ function switchPage(id, el) {
 const threadPhones = {
   'Ayşe K.':  '+1 (618) 520-3531',
   'Fatma Y.': '+1 (773) 842-0194',
+  'Tolga T.': '+1 (312) 445-7823',
   'Merve D.': '+1 (312) 904-7265',
   'Zeynep A.':'+1 (847) 231-6480',
   'Selin T.': '+1 (630) 558-9017',
@@ -1786,6 +1798,12 @@ const threadData = {
     { dir:'in', text:'Thank you so much for the help! 🙏', time:'May 5, 2026 · 9:02 AM' },
     { dir:'out', ai:true, template:true, text:"You're very welcome! Feel free to reach out anytime — I'm happy to help you navigate the process. Best of luck with your nursing journey! 🌟", time:'May 5, 2026 · 9:03 AM' },
   ],
+  'Tolga T.': [
+    { dir:'in', text:'Hi, I just got my NCLEX pass result. What should I do next?', time:'May 5, 2026 · 8:10 AM' },
+    { dir:'out', ai:true, text:'Congratulations! Next step is to apply for your state nursing license. Choose a state with no CGFNS requirement first — Texas or Michigan are great starting points for Turkish nurses. You\'ll also need to start your VisaScreen application in parallel.', time:'May 5, 2026 · 8:11 AM' },
+    { dir:'in', text:'Can I work while my EB-3 is pending?', time:'May 5, 2026 · 8:15 AM' },
+    { dir:'out', ai:true, template:true, text:'Yes — once your I-485 (Adjustment of Status) is filed, you can apply for an Employment Authorization Document (EAD). Processing takes 3–5 months, but with the combo card you can also travel. Many nurses work under EAD while waiting for their green card.', time:'May 5, 2026 · 8:16 AM' },
+  ],
   'Merve D.': [
     { dir:'in', text:'How long does EB-3 visa processing take?', time:'May 5, 2026 · 7:30 AM' },
     { dir:'out', ai:true, text:'EB-3 processing currently takes 12–18 months from USCIS approval to visa issuance, depending on your priority date and country of birth. For Turkish nurses, the backlog is relatively short compared to some other countries — your timeline could be closer to 12 months if you start soon.', time:'May 5, 2026 · 7:31 AM' },
@@ -1805,6 +1823,7 @@ const threadData = {
 const threadAutoApprove = {
   'Ayşe K.':  true,
   'Fatma Y.': false,
+  'Tolga T.': false,
   'Merve D.': true,
   'Zeynep A.': false,
   'Selin T.': true,
