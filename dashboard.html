@@ -1876,9 +1876,9 @@ function openThread(name, initials, color, online) {
       d.className = 'msg msg-out msg-approved';
       d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-approved-label"><div class="ai-dot" style="background:#10B981"></div> Answered by approval</div><div class="msg-time">${m.time}</div>`;
     } else if (m.template && !autoApprove && !m.actioned) {
-      d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button></div><div class="ai-indicator" style="color:#F59E0B"><div class="ai-dot" style="background:#F59E0B"></div> Needs You</div><div class="msg-time">${m.time}</div>`;
+      d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button></div><div class="ai-indicator" style="color:#F59E0B"><div class="ai-dot" style="background:#F59E0B"></div> AI Generated</div><div class="msg-time">${m.time}</div>`;
     } else if (m.template) {
-      d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-indicator" style="color:#F59E0B"><div class="ai-dot" style="background:#F59E0B"></div> Needs You</div><div class="msg-time">${m.time}</div>`;
+      d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-indicator" style="color:#F59E0B"><div class="ai-dot" style="background:#F59E0B"></div> AI Generated</div><div class="msg-time">${m.time}</div>`;
     } else {
       d.innerHTML = `<div class="msg-bubble">${m.text}</div>${m.ai ? '<div class="ai-indicator"><div class="ai-dot"></div> AI Answered</div>' : ''}<div class="msg-time">${m.time}</div>`;
     }
@@ -1935,7 +1935,7 @@ function triggerAIReply() {
       setInputLocked(true);
     } else {
       d.className = 'msg msg-out ai-msg';
-      d.innerHTML = `<div class="msg-bubble">${replyText}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button></div><div class="ai-indicator" style="color:#F59E0B"><div class="ai-dot" style="background:#F59E0B"></div> Needs You</div><div class="msg-time">Just now</div>`;
+      d.innerHTML = `<div class="msg-bubble">${replyText}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button></div><div class="ai-indicator" style="color:#F59E0B"><div class="ai-dot" style="background:#F59E0B"></div> AI Generated</div><div class="msg-time">Just now</div>`;
     }
     msgs.appendChild(d);
     msgs.scrollTop = msgs.scrollHeight;
