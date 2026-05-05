@@ -1349,12 +1349,12 @@ body {
 
     <div class="filter-pills">
       <div class="pill active" onclick="filterThreads('all',this)">All <span class="pill-count">5</span></div>
-      <div class="pill" onclick="filterThreads('unread',this)">Unread <span class="pill-count">4</span></div>
+      <div class="pill" onclick="filterThreads('unread',this)">Unread <span class="pill-count">2</span></div>
       <div class="pill" onclick="filterThreads('ai',this)">AI handled <span class="pill-count">3</span></div>
     </div>
 
     <div id="thread-list">
-      <div class="chat-thread" onclick="openThread('Ayşe K.','AK','#5B8EF0',true)">
+      <div class="chat-thread" data-status="ai-handled" onclick="openThread('Ayşe K.','AK','#5B8EF0',true)">
         <div class="thread-avatar" style="background:rgba(91,142,240,0.15);color:#5B8EF0">AK<div class="thread-online"></div></div>
         <div class="thread-info">
           <div class="thread-top"><div class="thread-name">Ayşe K.</div><div class="thread-time">2m ago</div></div>
@@ -1365,7 +1365,7 @@ body {
           </div>
         </div>
       </div>
-      <div class="chat-thread" onclick="openThread('Fatma Y.','FY','#8B5CF6',false)">
+      <div class="chat-thread" data-status="unread" onclick="openThread('Fatma Y.','FY','#8B5CF6',false)">
         <div class="thread-avatar" style="background:rgba(139,92,246,0.15);color:#8B5CF6">FY</div>
         <div class="thread-info">
           <div class="thread-top"><div class="thread-name">Fatma Y.</div><div class="thread-time">1h ago</div></div>
@@ -1376,7 +1376,7 @@ body {
           </div>
         </div>
       </div>
-      <div class="chat-thread" onclick="openThread('Merve D.','MD','#10B981',true)">
+      <div class="chat-thread" data-status="ai-handled" onclick="openThread('Merve D.','MD','#10B981',true)">
         <div class="thread-avatar" style="background:rgba(16,185,129,0.15);color:#10B981">MD<div class="thread-online"></div></div>
         <div class="thread-info">
           <div class="thread-top"><div class="thread-name">Merve D.</div><div class="thread-time">3h ago</div></div>
@@ -1387,7 +1387,7 @@ body {
           </div>
         </div>
       </div>
-      <div class="chat-thread" onclick="openThread('Zeynep A.','ZA','#F59E0B',false)">
+      <div class="chat-thread" data-status="unread" onclick="openThread('Zeynep A.','ZA','#F59E0B',false)">
         <div class="thread-avatar" style="background:rgba(245,158,11,0.15);color:#F59E0B">ZA</div>
         <div class="thread-info">
           <div class="thread-top"><div class="thread-name">Zeynep A.</div><div class="thread-time">Yesterday</div></div>
@@ -1398,7 +1398,7 @@ body {
           </div>
         </div>
       </div>
-      <div class="chat-thread" onclick="openThread('Selin T.','ST','#EF4444',false)">
+      <div class="chat-thread" data-status="ai-handled" onclick="openThread('Selin T.','ST','#EF4444',false)">
         <div class="thread-avatar" style="background:rgba(239,68,68,0.15);color:#EF4444">ST</div>
         <div class="thread-info">
           <div class="thread-top"><div class="thread-name">Selin T.</div><div class="thread-time">2 days ago</div></div>
@@ -2376,6 +2376,12 @@ function refreshInbox() {
 function filterThreads(filter, el) {
   document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
+  document.querySelectorAll('.chat-thread').forEach(t => {
+    const status = t.dataset.status;
+    if (filter === 'all') t.style.display = '';
+    else if (filter === 'unread') t.style.display = status === 'unread' ? '' : 'none';
+    else if (filter === 'ai') t.style.display = status === 'ai-handled' ? '' : 'none';
+  });
 }
 
 const files = {
