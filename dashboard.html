@@ -233,6 +233,10 @@ body {
 }
 .faq-input::placeholder { color: var(--text3); }
 
+.my-style-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.my-style-row input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+.my-style-row label { font-size: 13px; font-weight: 600; color: var(--text2); cursor: pointer; user-select: none; }
+
 .add-btn {
   width: 100%; background: var(--accent); border: none;
   border-radius: var(--radius-sm); padding: 14px;
@@ -2328,6 +2332,7 @@ function toggleRecording() {
 
 function buildFormHTML(typeName) {
   const titleField = `<div class="form-field"><div class="form-label">Title</div><input class="form-input" placeholder="Give this memory a title..."></div>`;
+  const myStyle = `<div class="my-style-row"><input type="checkbox" id="my-style-check" checked><label for="my-style-check">My Style</label></div>`;
 
   if (typeName === 'Note') {
     return titleField + `
@@ -2335,7 +2340,7 @@ function buildFormHTML(typeName) {
         <div class="form-label">Content</div>
         <textarea class="form-textarea" rows="9" placeholder="Write your note here..."></textarea>
       </div>
-      <button class="add-btn" onclick="saveArtifactForm()">Save Note</button>`;
+      ${myStyle}<button class="add-btn" onclick="saveArtifactForm()">Save Note</button>`;
   }
 
   if (typeName === 'Voice') {
@@ -2363,7 +2368,7 @@ function buildFormHTML(typeName) {
           </div>
         </div>
       </div>
-      <button class="add-btn" onclick="saveArtifactForm()">Save Voice</button>`;
+      ${myStyle}<button class="add-btn" onclick="saveArtifactForm()">Save Voice</button>`;
   }
 
   if (typeName === 'Video') {
@@ -2391,7 +2396,7 @@ function buildFormHTML(typeName) {
           </div>
         </div>
       </div>
-      <button class="add-btn" onclick="saveArtifactForm()">Save Video</button>`;
+      ${myStyle}<button class="add-btn" onclick="saveArtifactForm()">Save Video</button>`;
   }
 
   if (typeName === 'Document') {
@@ -2403,7 +2408,7 @@ function buildFormHTML(typeName) {
           Tap to select a document<br><span style="font-size:11px">PDF, Word, TXT</span>
         </div>
       </div>
-      <button class="add-btn" onclick="saveArtifactForm()">Save Document</button>`;
+      ${myStyle}<button class="add-btn" onclick="saveArtifactForm()">Save Document</button>`;
   }
 
   if (typeName === 'FAQ') {
@@ -2416,10 +2421,10 @@ function buildFormHTML(typeName) {
         <div class="form-label">Answer</div>
         <textarea class="form-textarea" rows="5" placeholder="Your answer..."></textarea>
       </div>
-      <button class="add-btn" onclick="saveArtifactForm()">Save FAQ</button>`;
+      ${myStyle}<button class="add-btn" onclick="saveArtifactForm()">Save FAQ</button>`;
   }
 
-  return titleField + `<button class="add-btn" onclick="saveArtifactForm()">Save</button>`;
+  return titleField + myStyle + `<button class="add-btn" onclick="saveArtifactForm()">Save</button>`;
 }
 
 function refreshInbox() {
