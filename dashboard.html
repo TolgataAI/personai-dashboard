@@ -411,6 +411,13 @@ body {
   background: var(--surface); border-top: 1px solid var(--border);
   display: flex; flex-direction: column; gap: 8px;
 }
+.input-locked-msg {
+  display: none; font-size: 12px; color: var(--text3);
+  text-align: center; padding: 10px 0;
+}
+.detail-input-wrap.locked .input-locked-msg { display: block; }
+.detail-input-wrap.locked .ai-reply-btn,
+.detail-input-wrap.locked .detail-input-row { display: none; }
 .ai-reply-btn {
   background: rgba(139,92,246,0.07); border: 1px solid rgba(139,92,246,0.18);
   border-radius: 10px; padding: 9px 14px;
@@ -1573,7 +1580,8 @@ body {
     <button class="auto-approve-toggle on" id="auto-approve-btn" onclick="toggleAutoApprove()"><svg id="auto-approve-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;flex-shrink:0"><rect x="1" y="6" width="22" height="12" rx="6"/><circle cx="16" cy="12" r="4" fill="currentColor" stroke="none"/></svg><span id="auto-approve-label">Auto Approve</span></button>
   </div>
   <div class="detail-messages" id="detail-messages"></div>
-  <div class="detail-input-wrap">
+  <div class="detail-input-wrap" id="detail-input-wrap">
+    <div class="input-locked-msg">Waiting for customer to reply…</div>
     <button class="ai-reply-btn" onclick="triggerAIReply()">
       <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       Let AI reply
@@ -1754,7 +1762,8 @@ const threadData = {
     { dir:'in', text:'Do I need CGFNS if I apply in Texas?', time:'May 5, 2026 · 10:24 AM' },
     { dir:'out', ai:true, text:'Texas does not require CGFNS certification for initial licensure. You still need a credential evaluation — you can use CGFNS or another approved agency like Josef Silny.', time:'May 5, 2026 · 10:24 AM' },
     { dir:'in', text:'Oh great! Which agency do you recommend?', time:'May 5, 2026 · 10:26 AM' },
-    { dir:'in', text:'And how long does it take?', time:'May 5, 2026 · 10:26 AM' },
+    { dir:'out', ai:true, text:'Josef Silny & Associates is my top pick — widely accepted in Texas and typically 6–8 weeks for Turkish nurses. Request a course-by-course evaluation.', time:'May 5, 2026 · 10:27 AM' },
+    { dir:'in', text:'And how long does it take?', time:'May 5, 2026 · 10:28 AM' },
   ],
   'Fatma Y.': [
     { dir:'in', text:'Is IELTS accepted by all US state nursing boards?', time:'May 4, 2026 · 3:15 PM' },
@@ -1766,6 +1775,7 @@ const threadData = {
   ],
   'Zeynep A.': [
     { dir:'in', text:'My credential evaluation was rejected...', time:'May 4, 2026 · 11:20 AM' },
+    { dir:'out', ai:true, text:"I'm sorry to hear that. What reason did CGFNS give for the rejection?", time:'May 4, 2026 · 11:21 AM' },
     { dir:'in', text:"CGFNS said my nursing school hours don't meet requirements. What should I do?", time:'May 4, 2026 · 11:22 AM' },
   ],
   'Selin T.': [
@@ -1785,6 +1795,10 @@ function toggleAutoApprove() {
     : '<rect x="1" y="6" width="22" height="12" rx="6"/><circle cx="16" cy="12" r="4" fill="currentColor" stroke="none"/>';
 }
 
+function setInputLocked(locked) {
+  document.getElementById('detail-input-wrap').classList.toggle('locked', locked);
+}
+
 function openThread(name, initials, color, online) {
   document.getElementById('detail-name').textContent = name;
   const st = document.getElementById('detail-status');
@@ -1797,13 +1811,16 @@ function openThread(name, initials, color, online) {
 
   const msgs = document.getElementById('detail-messages');
   msgs.innerHTML = '';
-  (threadData[name] || []).forEach(m => {
+  const messages = threadData[name] || [];
+  messages.forEach(m => {
     const d = document.createElement('div');
     d.className = 'msg msg-' + m.dir + (m.ai ? ' ai-msg' : '');
     d.innerHTML = `<div class="msg-bubble">${m.text}</div>${m.ai ? '<div class="ai-indicator"><div class="ai-dot"></div> Answered by AI persona</div>' : ''}<div class="msg-time">${m.time}</div>`;
     msgs.appendChild(d);
   });
   msgs.scrollTop = msgs.scrollHeight;
+  const lastMsg = messages[messages.length - 1];
+  setInputLocked(lastMsg && lastMsg.dir === 'out');
   document.getElementById('inbox-detail').classList.add('open');
 }
 
@@ -1822,6 +1839,7 @@ function sendDetailMsg() {
   msgs.appendChild(d);
   msgs.scrollTop = msgs.scrollHeight;
   input.value = '';
+  setInputLocked(true);
 }
 
 function triggerAIReply() {
@@ -1838,6 +1856,7 @@ function triggerAIReply() {
     d.innerHTML = `<div class="msg-bubble">For credential evaluation, I'd recommend Josef Silny & Associates — they're typically faster for Turkish nurses (4–6 weeks vs CGFNS's 3–5 months). Make sure to request a course-by-course evaluation.</div><div class="ai-indicator"><div class="ai-dot"></div> Answered by AI persona</div><div class="msg-time">Just now</div>`;
     msgs.appendChild(d);
     msgs.scrollTop = msgs.scrollHeight;
+    setInputLocked(true);
   }, 1200);
 }
 
