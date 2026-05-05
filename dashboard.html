@@ -537,8 +537,12 @@ body {
   align-self: flex-start; max-width: 78%;
 }
 .source-label { font-size: 10px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
-.source-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.source-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
 .source-tag { font-size: 10px; font-family: var(--mono); color: var(--accent); background: rgba(91,142,240,0.1); padding: 2px 7px; border-radius: 4px; }
+.source-scores { display: flex; gap: 10px; padding-top: 7px; border-top: 1px solid rgba(91,142,240,0.12); }
+.source-score { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.source-score-label { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; }
+.source-score-val { font-size: 12px; font-weight: 700; font-family: var(--mono); color: var(--text); }
 
 /* ====== MEMORY ====== */
 .memory-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
@@ -2011,7 +2015,7 @@ function sendChatMsg() {
     msgs.appendChild(ai);
     const src = document.createElement('div');
     src.className = 'source-card';
-    src.innerHTML = `<div class="source-label">Sources used</div><div class="source-tags"><span class="source-tag">states/texas.md</span><span class="source-tag">expert/gizem-insights.md</span></div>`;
+    src.innerHTML = `<div class="source-label">Sources used</div><div class="source-tags"><span class="source-tag">states/texas.md</span><span class="source-tag">expert/gizem-insights.md</span></div><div class="source-scores"><div class="source-score"><div class="source-score-label">Style</div><div class="source-score-val">0.62</div></div><div class="source-score"><div class="source-score-label">Content</div><div class="source-score-val">1.00</div></div><div class="source-score"><div class="source-score-label">Tone</div><div class="source-score-val">0.60</div></div></div>`;
     msgs.appendChild(src);
     msgs.scrollTop = msgs.scrollHeight;
     setChatLocked(false);
