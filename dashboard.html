@@ -404,7 +404,7 @@ body {
   border-bottom-left-radius: 4px; color: var(--text);
 }
 .msg-out .msg-bubble { background: var(--accent); border-bottom-right-radius: 4px; color: white; }
-.msg-out.ai-msg .msg-bubble { background: #B89CF7; }
+.msg-out.ai-msg .msg-bubble { background: #F59E0B; }
 .msg-out.ai-answered .msg-bubble { background: var(--accent2); }
 .msg-time { font-size: 10px; color: var(--text3); margin-top: 4px; padding: 0 4px; }
 .msg-out .msg-time { text-align: right; }
@@ -1941,11 +1941,14 @@ function triggerAIReply() {
 
 function approveMsg(btn) {
   const msgDiv = btn.closest('.msg');
-  msgDiv.classList.add('msg-approved');
   msgDiv.querySelector('.ai-template-actions').remove();
-  const ind = msgDiv.querySelector('.ai-indicator');
-  ind.className = 'ai-approved-label';
-  ind.innerHTML = '<div class="ai-dot" style="background:#10B981"></div> Approved';
+  const text = msgDiv.querySelector('.msg-bubble').textContent;
+  const msgs = document.getElementById('detail-messages');
+  const d = document.createElement('div');
+  d.className = 'msg msg-out';
+  d.innerHTML = `<div class="msg-bubble">${text}</div><div class="ai-approved-label" style="color:var(--accent)"><div class="ai-dot" style="background:var(--accent)"></div> Approved by you</div><div class="msg-time">Just now</div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
   setInputLocked(true);
 }
 
