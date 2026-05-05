@@ -375,14 +375,17 @@ body {
 .detail-user { flex: 1; min-width: 0; }
 .detail-name { font-size: 15px; font-weight: 600; }
 .detail-status { font-size: 11px; }
-.ai-on-btn {
-  background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.2);
-  border-radius: 8px; padding: 5px 10px;
-  font-size: 11px; font-weight: 600; color: var(--accent2);
-  cursor: pointer; font-family: var(--font);
-  display: flex; align-items: center; gap: 5px; white-space: nowrap;
+.auto-approve-toggle {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  white-space: nowrap; border: 1px solid; border-radius: 8px;
+  padding: 5px 10px; font-family: var(--font); background: none;
 }
-.ai-on-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: pulse 2s infinite; }
+.auto-approve-toggle.on { background: rgba(16,185,129,0.1); color: #10B981; border-color: rgba(16,185,129,0.25); }
+.auto-approve-toggle.off { background: rgba(239,68,68,0.1); color: #EF4444; border-color: rgba(239,68,68,0.25); }
+.auto-approve-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.auto-approve-toggle.on .auto-approve-dot { background: #10B981; }
+.auto-approve-toggle.off .auto-approve-dot { background: #EF4444; }
 
 .detail-messages {
   flex: 1; overflow-y: auto; padding: 16px;
@@ -1567,7 +1570,7 @@ body {
       <div class="detail-name" id="detail-name"></div>
       <div class="detail-status" id="detail-status"></div>
     </div>
-    <div class="ai-on-btn"><div class="ai-on-dot"></div> AI on</div>
+    <button class="auto-approve-toggle on" id="auto-approve-btn" onclick="toggleAutoApprove()"><div class="auto-approve-dot"></div> Auto Approve</button>
   </div>
   <div class="detail-messages" id="detail-messages"></div>
   <div class="detail-input-wrap">
@@ -1738,36 +1741,50 @@ function switchPage(id, el) {
   el.classList.add('active');
 }
 
+const threadPhones = {
+  'Ayşe K.':  '+1(618)520-3531',
+  'Fatma Y.': '+1(773)842-0194',
+  'Merve D.': '+1(312)904-7265',
+  'Zeynep A.':'+1(847)231-6480',
+  'Selin T.': '+1(630)558-9017',
+};
+
 const threadData = {
   'Ayşe K.': [
-    { dir:'in', text:'Do I need CGFNS if I apply in Texas?', time:'10:24 AM' },
-    { dir:'out', ai:true, text:'Texas does not require CGFNS certification for initial licensure. You still need a credential evaluation — you can use CGFNS or another approved agency like Josef Silny.', time:'10:24 AM' },
-    { dir:'in', text:'Oh great! Which agency do you recommend?', time:'10:26 AM' },
-    { dir:'in', text:'And how long does it take?', time:'10:26 AM' },
+    { dir:'in', text:'Do I need CGFNS if I apply in Texas?', time:'May 5, 2026 · 10:24 AM' },
+    { dir:'out', ai:true, text:'Texas does not require CGFNS certification for initial licensure. You still need a credential evaluation — you can use CGFNS or another approved agency like Josef Silny.', time:'May 5, 2026 · 10:24 AM' },
+    { dir:'in', text:'Oh great! Which agency do you recommend?', time:'May 5, 2026 · 10:26 AM' },
+    { dir:'in', text:'And how long does it take?', time:'May 5, 2026 · 10:26 AM' },
   ],
   'Fatma Y.': [
-    { dir:'in', text:'Is IELTS accepted by all US state nursing boards?', time:'Yesterday' },
-    { dir:'out', ai:true, text:'Most state boards accept IELTS Academic with a minimum overall band of 6.5 and no component below 6.0. Some states also accept TOEFL or OET.', time:'Yesterday' },
-    { dir:'in', text:'Thank you so much for the help! 🙏', time:'1h ago' },
+    { dir:'in', text:'Is IELTS accepted by all US state nursing boards?', time:'May 4, 2026 · 3:15 PM' },
+    { dir:'out', ai:true, text:'Most state boards accept IELTS Academic with a minimum overall band of 6.5 and no component below 6.0. Some states also accept TOEFL or OET.', time:'May 4, 2026 · 3:15 PM' },
+    { dir:'in', text:'Thank you so much for the help! 🙏', time:'May 5, 2026 · 9:02 AM' },
   ],
   'Merve D.': [
-    { dir:'in', text:'How long does EB-3 visa processing take?', time:'3h ago' },
+    { dir:'in', text:'How long does EB-3 visa processing take?', time:'May 5, 2026 · 7:30 AM' },
   ],
   'Zeynep A.': [
-    { dir:'in', text:'My credential evaluation was rejected...', time:'Yesterday' },
-    { dir:'in', text:"CGFNS said my nursing school hours don't meet requirements. What should I do?", time:'Yesterday' },
+    { dir:'in', text:'My credential evaluation was rejected...', time:'May 4, 2026 · 11:20 AM' },
+    { dir:'in', text:"CGFNS said my nursing school hours don't meet requirements. What should I do?", time:'May 4, 2026 · 11:22 AM' },
   ],
   'Selin T.': [
-    { dir:'in', text:'Which English test is accepted in California?', time:'2 days ago' },
-    { dir:'out', ai:true, text:'California BRN accepts TOEFL iBT (min 83), IELTS Academic (6.5), OET Nursing (grade B). California has stricter requirements than most states — plan accordingly.', time:'2 days ago' },
+    { dir:'in', text:'Which English test is accepted in California?', time:'May 3, 2026 · 2:45 PM' },
+    { dir:'out', ai:true, text:'California BRN accepts TOEFL iBT (min 83), IELTS Academic (6.5), OET Nursing (grade B). California has stricter requirements than most states — plan accordingly.', time:'May 3, 2026 · 2:46 PM' },
   ],
 };
+
+function toggleAutoApprove() {
+  const btn = document.getElementById('auto-approve-btn');
+  btn.classList.toggle('on');
+  btn.classList.toggle('off');
+}
 
 function openThread(name, initials, color, online) {
   document.getElementById('detail-name').textContent = name;
   const st = document.getElementById('detail-status');
-  st.textContent = online ? 'online' : 'last seen recently';
-  st.style.color = online ? 'var(--accent3)' : 'var(--text3)';
+  st.textContent = threadPhones[name] || '';
+  st.style.color = 'var(--text3)';
   const av = document.getElementById('detail-avatar');
   av.textContent = initials;
   av.style.background = color + '22';
