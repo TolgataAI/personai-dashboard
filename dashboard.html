@@ -1807,7 +1807,8 @@ const threadData = {
     { dir:'in', text:'Hi, I just got my NCLEX pass result. What should I do next?', time:'May 5, 2026 · 8:10 AM' },
     { dir:'out', ai:true, text:'Congratulations! Next step is to apply for your state nursing license. Choose a state with no CGFNS requirement first — Texas or Michigan are great starting points for Turkish nurses. You\'ll also need to start your VisaScreen application in parallel.', time:'May 5, 2026 · 8:11 AM' },
     { dir:'in', text:'Can I work while my EB-3 is pending?', time:'May 5, 2026 · 8:15 AM' },
-    { dir:'out', ai:true, approved:true, text:'Yes — once your I-485 (Adjustment of Status) is filed, you can apply for an Employment Authorization Document (EAD). Processing takes 3–5 months, but with the combo card you can also travel. Many nurses work under EAD while waiting for their green card.', time:'May 5, 2026 · 8:16 AM' },
+    { dir:'out', ai:true, template:true, actioned:true, text:'Yes — once your I-485 (Adjustment of Status) is filed, you can apply for an Employment Authorization Document (EAD). Processing takes 3–5 months, but with the combo card you can also travel. Many nurses work under EAD while waiting for their green card.', time:'May 5, 2026 · 8:16 AM' },
+    { dir:'out', approved:true, text:'Yes — once your I-485 (Adjustment of Status) is filed, you can apply for an Employment Authorization Document (EAD). Processing takes 3–5 months, but with the combo card you can also travel. Many nurses work under EAD while waiting for their green card.', time:'May 5, 2026 · 8:17 AM' },
   ],
   'Merve D.': [
     { dir:'in', text:'How long does EB-3 visa processing take?', time:'May 5, 2026 · 7:30 AM' },
@@ -1873,9 +1874,11 @@ function openThread(name, initials, color, online) {
     d.className = 'msg msg-' + m.dir + (m.ai ? (m.template ? ' ai-msg' : ' ai-answered') : '');
     if (m.approved) {
       d.className = 'msg msg-out msg-approved';
-      d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-approved-label"><div class="ai-dot" style="background:#10B981"></div> Approved</div><div class="msg-time">${m.time}</div>`;
-    } else if (m.template && !autoApprove) {
+      d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-approved-label"><div class="ai-dot" style="background:#10B981"></div> Answered by approval</div><div class="msg-time">${m.time}</div>`;
+    } else if (m.template && !autoApprove && !m.actioned) {
       d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button></div><div class="ai-indicator" style="color:#F59E0B"><div class="ai-dot" style="background:#F59E0B"></div> Needs You</div><div class="msg-time">${m.time}</div>`;
+    } else if (m.template) {
+      d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-indicator" style="color:#F59E0B"><div class="ai-dot" style="background:#F59E0B"></div> Needs You</div><div class="msg-time">${m.time}</div>`;
     } else {
       d.innerHTML = `<div class="msg-bubble">${m.text}</div>${m.ai ? '<div class="ai-indicator"><div class="ai-dot"></div> AI Answered</div>' : ''}<div class="msg-time">${m.time}</div>`;
     }
