@@ -1599,10 +1599,6 @@ body {
   <div class="detail-messages" id="detail-messages"></div>
   <div class="detail-input-wrap" id="detail-input-wrap">
     <div class="input-locked-msg">Waiting for customer to reply…</div>
-    <button class="ai-reply-btn" onclick="triggerAIReply()">
-      <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      Let AI reply
-    </button>
     <div class="detail-input-row">
       <textarea class="detail-input" id="detail-input" rows="1" placeholder="Type message..."></textarea>
       <button class="send-btn" onclick="sendDetailMsg()">
@@ -1872,7 +1868,7 @@ function sendDetailMsg() {
   const msgs = document.getElementById('detail-messages');
   const d = document.createElement('div');
   d.className = 'msg msg-out';
-  d.innerHTML = `<div class="msg-bubble">${text}</div><div class="msg-time">Just now</div>`;
+  d.innerHTML = `<div class="msg-bubble">${text}</div><div class="ai-approved-label"><div class="ai-dot" style="background:var(--accent)"></div> Edited by You</div><div class="msg-time">Just now</div>`;
   msgs.appendChild(d);
   msgs.scrollTop = msgs.scrollHeight;
   input.value = '';
