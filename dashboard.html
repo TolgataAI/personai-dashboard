@@ -1424,37 +1424,16 @@ body {
   <!-- CHAT PAGE -->
   <div class="page" id="page-chat">
 
-    <div class="section-header">
-      <div class="section-title">Test Persona</div>
-      <div class="section-sub">Chat as your users would</div>
-    </div>
-
-    <div class="persona-chat-header">
-      <div class="pch-avatar">G</div>
-      <div class="pch-info">
-        <div class="pch-name">Gizem AI Persona</div>
-        <div class="pch-status"><div class="pch-dot"></div> Active · 142 wiki pages loaded</div>
-      </div>
-    </div>
-
-    <div class="suggestion-chips">
-      <div class="chip" onclick="sendSuggestion(this)">NCLEX eligibility</div>
-      <div class="chip" onclick="sendSuggestion(this)">CGFNS process</div>
-      <div class="chip" onclick="sendSuggestion(this)">Best states for foreign nurses</div>
-      <div class="chip" onclick="sendSuggestion(this)">EB-3 visa timeline</div>
-    </div>
-
     <div class="chat-messages" id="chat-messages">
       <div class="msg msg-in">
         <div class="msg-bubble">Merhaba! I'm Gizem's AI persona. Ask me anything about becoming a nurse in the USA.</div>
-        <div class="ai-indicator"><div class="ai-dot"></div> AI persona response</div>
         <div class="msg-time">Just now</div>
       </div>
     </div>
 
     <div class="chat-input-row">
       <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask your persona anything..."></textarea>
-      <button class="send-btn" onclick="sendChatMsg()">
+      <button class="send-btn" id="chat-send-btn" onclick="sendChatMsg()">
         <svg viewBox="0 0 24 24" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
     </div>
@@ -1964,16 +1943,26 @@ function discardMsg(btn) {
   btn.closest('.msg').remove();
 }
 
+function setChatLocked(locked) {
+  const input = document.getElementById('chat-input');
+  const btn = document.getElementById('chat-send-btn');
+  input.disabled = locked;
+  btn.disabled = locked;
+  input.placeholder = locked ? 'Waiting for persona response...' : 'Ask your persona anything...';
+  btn.style.opacity = locked ? '0.4' : '';
+}
+
 function sendChatMsg() {
   const input = document.getElementById('chat-input');
   const text = input.value.trim();
-  if (!text) return;
+  if (!text || input.disabled) return;
   const msgs = document.getElementById('chat-messages');
   const userMsg = document.createElement('div');
   userMsg.className = 'msg msg-out';
   userMsg.innerHTML = `<div class="msg-bubble">${text}</div><div class="msg-time">Just now</div>`;
   msgs.appendChild(userMsg);
   input.value = '';
+  setChatLocked(true);
   const typing = document.createElement('div');
   typing.className = 'msg msg-in';
   typing.id = 'typing';
@@ -1984,13 +1973,14 @@ function sendChatMsg() {
     document.getElementById('typing')?.remove();
     const ai = document.createElement('div');
     ai.className = 'msg msg-in';
-    ai.innerHTML = `<div class="msg-bubble">Texas and Florida are the most accessible states for Turkish nurses. Texas doesn't require CGFNS certification and the board is responsive to international applicants. I always recommend starting there.</div><div class="ai-indicator"><div class="ai-dot"></div> AI persona response</div><div class="msg-time">Just now</div>`;
+    ai.innerHTML = `<div class="msg-bubble">Texas and Florida are the most accessible states for Turkish nurses. Texas doesn't require CGFNS certification and the board is responsive to international applicants. I always recommend starting there.</div><div class="msg-time">Just now</div>`;
     msgs.appendChild(ai);
     const src = document.createElement('div');
     src.className = 'source-card';
     src.innerHTML = `<div class="source-label">Sources used</div><div class="source-tags"><span class="source-tag">states/texas.md</span><span class="source-tag">expert/gizem-insights.md</span></div>`;
     msgs.appendChild(src);
     msgs.scrollTop = msgs.scrollHeight;
+    setChatLocked(false);
   }, 1000);
 }
 
