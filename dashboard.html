@@ -1570,7 +1570,7 @@ body {
       <div class="detail-name" id="detail-name"></div>
       <div class="detail-status" id="detail-status"></div>
     </div>
-    <button class="auto-approve-toggle on" id="auto-approve-btn" onclick="toggleAutoApprove()"><div class="auto-approve-dot"></div> Auto Approve</button>
+    <button class="auto-approve-toggle on" id="auto-approve-btn" onclick="toggleAutoApprove()"><svg id="auto-approve-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;flex-shrink:0"><rect x="1" y="6" width="22" height="12" rx="6"/><circle cx="16" cy="12" r="4" fill="currentColor" stroke="none"/></svg><span id="auto-approve-label">Auto Approve</span></button>
   </div>
   <div class="detail-messages" id="detail-messages"></div>
   <div class="detail-input-wrap">
@@ -1579,7 +1579,7 @@ body {
       Let AI reply
     </button>
     <div class="detail-input-row">
-      <textarea class="detail-input" id="detail-input" rows="1" placeholder="Reply manually..."></textarea>
+      <textarea class="detail-input" id="detail-input" rows="1" placeholder="Type message..."></textarea>
       <button class="send-btn" onclick="sendDetailMsg()">
         <svg viewBox="0 0 24 24" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
@@ -1776,8 +1776,13 @@ const threadData = {
 
 function toggleAutoApprove() {
   const btn = document.getElementById('auto-approve-btn');
-  btn.classList.toggle('on');
-  btn.classList.toggle('off');
+  const isOn = btn.classList.contains('on');
+  btn.classList.toggle('on', !isOn);
+  btn.classList.toggle('off', isOn);
+  document.getElementById('auto-approve-label').textContent = isOn ? 'Auto Approve Off' : 'Auto Approve';
+  document.getElementById('auto-approve-icon').innerHTML = isOn
+    ? '<rect x="1" y="6" width="22" height="12" rx="6"/><circle cx="8" cy="12" r="4" fill="currentColor" stroke="none"/>'
+    : '<rect x="1" y="6" width="22" height="12" rx="6"/><circle cx="16" cy="12" r="4" fill="currentColor" stroke="none"/>';
 }
 
 function openThread(name, initials, color, online) {
