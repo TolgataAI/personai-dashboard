@@ -1354,7 +1354,7 @@ body {
     <div class="filter-pills">
       <div class="pill active" onclick="filterThreads('all',this)">All <span class="pill-count">6</span></div>
       <div class="pill" onclick="filterThreads('unread',this)">Needs you <span class="pill-count">2</span></div>
-      <div class="pill" onclick="filterThreads('ai',this)">AI handled <span class="pill-count">3</span></div>
+      <div class="pill" onclick="filterThreads('ai',this)">AI Answered <span class="pill-count">3</span></div>
       <div class="pill" onclick="filterThreads('answered',this)">Answered <span class="pill-count">1</span></div>
     </div>
 
@@ -1366,7 +1366,7 @@ body {
           <div class="thread-phone">+1 (618) 520-3531</div>
           <div class="thread-preview-row">
             <div class="thread-preview">Do I need CGFNS if I apply in Texas?</div>
-            <div class="ai-handled-badge">AI handled</div>
+            <div class="ai-handled-badge">AI Answered</div>
           </div>
         </div>
       </div>
@@ -1399,7 +1399,7 @@ body {
           <div class="thread-phone">+1 (312) 904-7265</div>
           <div class="thread-preview-row">
             <div class="thread-preview">How long does EB-3 visa processing take?</div>
-            <div class="ai-handled-badge">AI handled</div>
+            <div class="ai-handled-badge">AI Answered</div>
           </div>
         </div>
       </div>
@@ -1421,7 +1421,7 @@ body {
           <div class="thread-phone">+1 (630) 558-9017</div>
           <div class="thread-preview-row">
             <div class="thread-preview">Which English test is accepted in California?</div>
-            <div class="ai-handled-badge">AI handled</div>
+            <div class="ai-handled-badge">AI Answered</div>
           </div>
         </div>
       </div>
@@ -1875,9 +1875,9 @@ function openThread(name, initials, color, online) {
       d.className = 'msg msg-out msg-approved';
       d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-approved-label"><div class="ai-dot" style="background:#10B981"></div> Approved</div><div class="msg-time">${m.time}</div>`;
     } else if (m.template && !autoApprove) {
-      d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button></div><div class="ai-indicator"><div class="ai-dot"></div> Template by AI</div><div class="msg-time">${m.time}</div>`;
+      d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button></div><div class="ai-indicator" style="color:#F59E0B"><div class="ai-dot" style="background:#F59E0B"></div> Needs you</div><div class="msg-time">${m.time}</div>`;
     } else {
-      d.innerHTML = `<div class="msg-bubble">${m.text}</div>${m.ai ? '<div class="ai-indicator"><div class="ai-dot"></div> Answered by AI</div>' : ''}<div class="msg-time">${m.time}</div>`;
+      d.innerHTML = `<div class="msg-bubble">${m.text}</div>${m.ai ? '<div class="ai-indicator"><div class="ai-dot"></div> AI Answered</div>' : ''}<div class="msg-time">${m.time}</div>`;
     }
     msgs.appendChild(d);
   });
@@ -1928,11 +1928,11 @@ function triggerAIReply() {
     const d = document.createElement('div');
     if (isAutoApprove()) {
       d.className = 'msg msg-out ai-answered';
-      d.innerHTML = `<div class="msg-bubble">${replyText}</div><div class="ai-indicator"><div class="ai-dot"></div> Answered by AI</div><div class="msg-time">Just now</div>`;
+      d.innerHTML = `<div class="msg-bubble">${replyText}</div><div class="ai-indicator"><div class="ai-dot"></div> AI Answered</div><div class="msg-time">Just now</div>`;
       setInputLocked(true);
     } else {
       d.className = 'msg msg-out ai-msg';
-      d.innerHTML = `<div class="msg-bubble">${replyText}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button></div><div class="ai-indicator"><div class="ai-dot"></div> Template by AI</div><div class="msg-time">Just now</div>`;
+      d.innerHTML = `<div class="msg-bubble">${replyText}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button></div><div class="ai-indicator" style="color:#F59E0B"><div class="ai-dot" style="background:#F59E0B"></div> Needs you</div><div class="msg-time">Just now</div>`;
     }
     msgs.appendChild(d);
     msgs.scrollTop = msgs.scrollHeight;
