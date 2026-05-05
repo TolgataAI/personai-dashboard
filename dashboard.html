@@ -352,6 +352,10 @@ body {
   font-size: 9px; font-weight: 600; color: var(--accent4);
   background: rgba(245,158,11,0.1); padding: 3px 7px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;
 }
+.answered-badge {
+  font-size: 9px; font-weight: 600; color: #10B981;
+  background: rgba(16,185,129,0.1); padding: 3px 7px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;
+}
 
 /* ====== INBOX DETAIL ====== */
 .inbox-detail {
@@ -1349,8 +1353,9 @@ body {
 
     <div class="filter-pills">
       <div class="pill active" onclick="filterThreads('all',this)">All <span class="pill-count">6</span></div>
-      <div class="pill" onclick="filterThreads('unread',this)">Needs you <span class="pill-count">3</span></div>
+      <div class="pill" onclick="filterThreads('unread',this)">Needs you <span class="pill-count">2</span></div>
       <div class="pill" onclick="filterThreads('ai',this)">AI handled <span class="pill-count">3</span></div>
+      <div class="pill" onclick="filterThreads('answered',this)">Answered <span class="pill-count">1</span></div>
     </div>
 
     <div id="thread-list">
@@ -1376,14 +1381,14 @@ body {
           </div>
         </div>
       </div>
-      <div class="chat-thread" data-status="unread" onclick="openThread('Tolga T.','TT','#06B6D4',false)">
+      <div class="chat-thread" data-status="answered" onclick="openThread('Tolga T.','TT','#06B6D4',false)">
         <div class="thread-avatar" style="background:rgba(6,182,212,0.15);color:#06B6D4">TT</div>
         <div class="thread-info">
           <div class="thread-top"><div class="thread-name">Tolga T.</div><div class="thread-time">2h ago</div></div>
           <div class="thread-phone">+1 (312) 445-7823</div>
           <div class="thread-preview-row">
             <div class="thread-preview">Can I work while my EB-3 is pending?</div>
-            <div class="needs-you-badge">Needs you</div>
+            <div class="answered-badge">Answered</div>
           </div>
         </div>
       </div>
@@ -1802,7 +1807,7 @@ const threadData = {
     { dir:'in', text:'Hi, I just got my NCLEX pass result. What should I do next?', time:'May 5, 2026 · 8:10 AM' },
     { dir:'out', ai:true, text:'Congratulations! Next step is to apply for your state nursing license. Choose a state with no CGFNS requirement first — Texas or Michigan are great starting points for Turkish nurses. You\'ll also need to start your VisaScreen application in parallel.', time:'May 5, 2026 · 8:11 AM' },
     { dir:'in', text:'Can I work while my EB-3 is pending?', time:'May 5, 2026 · 8:15 AM' },
-    { dir:'out', ai:true, template:true, text:'Yes — once your I-485 (Adjustment of Status) is filed, you can apply for an Employment Authorization Document (EAD). Processing takes 3–5 months, but with the combo card you can also travel. Many nurses work under EAD while waiting for their green card.', time:'May 5, 2026 · 8:16 AM' },
+    { dir:'out', ai:true, approved:true, text:'Yes — once your I-485 (Adjustment of Status) is filed, you can apply for an Employment Authorization Document (EAD). Processing takes 3–5 months, but with the combo card you can also travel. Many nurses work under EAD while waiting for their green card.', time:'May 5, 2026 · 8:16 AM' },
   ],
   'Merve D.': [
     { dir:'in', text:'How long does EB-3 visa processing take?', time:'May 5, 2026 · 7:30 AM' },
@@ -1866,7 +1871,10 @@ function openThread(name, initials, color, online) {
   messages.forEach(m => {
     const d = document.createElement('div');
     d.className = 'msg msg-' + m.dir + (m.ai ? (m.template ? ' ai-msg' : ' ai-answered') : '');
-    if (m.template && !autoApprove) {
+    if (m.approved) {
+      d.className = 'msg msg-out msg-approved';
+      d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-approved-label"><div class="ai-dot" style="background:#10B981"></div> Approved</div><div class="msg-time">${m.time}</div>`;
+    } else if (m.template && !autoApprove) {
       d.innerHTML = `<div class="msg-bubble">${m.text}</div><div class="ai-template-actions"><button class="ai-action-btn ai-action-approve" onclick="approveMsg(this)">Approve</button><button class="ai-action-btn ai-action-edit" onclick="editMsg(this)">Edit</button></div><div class="ai-indicator"><div class="ai-dot"></div> Template by AI</div><div class="msg-time">${m.time}</div>`;
     } else {
       d.innerHTML = `<div class="msg-bubble">${m.text}</div>${m.ai ? '<div class="ai-indicator"><div class="ai-dot"></div> Answered by AI</div>' : ''}<div class="msg-time">${m.time}</div>`;
@@ -2400,6 +2408,7 @@ function filterThreads(filter, el) {
     if (filter === 'all') t.style.display = '';
     else if (filter === 'unread') t.style.display = status === 'unread' ? '' : 'none';
     else if (filter === 'ai') t.style.display = status === 'ai-handled' ? '' : 'none';
+    else if (filter === 'answered') t.style.display = status === 'answered' ? '' : 'none';
   });
 }
 
