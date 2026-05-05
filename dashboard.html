@@ -465,6 +465,19 @@ body {
 .send-btn svg { width: 16px; height: 16px; stroke: white; fill: none; }
 
 /* ====== CHAT ====== */
+#page-chat { padding-top: 0; }
+.chat-sticky-header {
+  position: sticky;
+  top: 0;
+  margin: 0 -20px 20px;
+  padding: 14px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  z-index: 5;
+}
+.chat-sticky-name { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; }
+.chat-sticky-role { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
 .persona-chat-header {
   background: linear-gradient(135deg, rgba(91,142,240,0.07), rgba(139,92,246,0.07));
   border: 1px solid rgba(91,142,240,0.15);
@@ -1423,6 +1436,11 @@ body {
 
   <!-- CHAT PAGE -->
   <div class="page" id="page-chat">
+
+    <div class="chat-sticky-header">
+      <div class="chat-sticky-name">Gizem Tanriseven</div>
+      <div class="chat-sticky-role">US Nurse Immigration Expert</div>
+    </div>
 
     <div class="chat-messages" id="chat-messages">
       <div class="msg msg-in">
