@@ -1319,9 +1319,14 @@ body {
   <!-- INBOX PAGE -->
   <div class="page" id="page-inbox">
 
-    <div class="section-header">
-      <div class="section-title">Inbox <span style="font-size:15px;font-weight:400;color:var(--text3)">· 4 unread</span></div>
-      <div class="section-sub">AI persona handles replies automatically</div>
+    <div class="section-header" style="display:flex;align-items:flex-start;justify-content:space-between">
+      <div>
+        <div class="section-title">Inbox <span style="font-size:15px;font-weight:400;color:var(--text3)">· 4 unread</span></div>
+        <div class="section-sub">AI persona handles replies automatically</div>
+      </div>
+      <button onclick="refreshInbox()" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--text3);display:flex;align-items:center;justify-content:center;border-radius:8px;margin-top:2px" title="Refresh">
+        <svg id="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
     </div>
 
     <div class="inbox-search">
@@ -2288,6 +2293,13 @@ function buildFormHTML(typeName) {
   }
 
   return titleField + `<button class="add-btn" onclick="saveArtifactForm()">Save</button>`;
+}
+
+function refreshInbox() {
+  const icon = document.getElementById('refresh-icon');
+  icon.style.transition = 'transform 0.6s ease';
+  icon.style.transform = 'rotate(360deg)';
+  setTimeout(() => { icon.style.transition = 'none'; icon.style.transform = 'rotate(0deg)'; }, 650);
 }
 
 function filterThreads(filter, el) {
