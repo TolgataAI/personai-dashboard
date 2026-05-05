@@ -167,6 +167,11 @@ body {
   letter-spacing: 0.8px; margin-bottom: 12px;
 }
 
+/* ====== PROFILE SECTIONS ====== */
+.profile-section { margin-bottom: 32px; }
+.profile-section-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 10px; border-bottom: 1.5px solid var(--border); margin-bottom: 18px; }
+.profile-section-title { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; }
+
 /* ====== PROFILE ====== */
 .persona-card {
   background: linear-gradient(135deg, rgba(91,142,240,0.07), rgba(139,92,246,0.07));
@@ -961,26 +966,23 @@ body {
   <!-- PROFILE PAGE -->
   <div class="page active" id="page-profile">
 
-    <!-- Identity + About card -->
-    <div class="persona-card" style="flex-direction:column;align-items:stretch;gap:0">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between">
-        <div style="flex:1;min-width:0">
-          <div id="persona-view">
-            <div class="persona-name" id="persona-name-display">Gizem Tanriseven</div>
-            <div class="persona-role" id="persona-role-display">US Nurse Immigration Expert</div>
-          </div>
-          <div id="persona-edit" style="display:none">
-            <input class="persona-edit-input" id="persona-name-input" value="Gizem Tanriseven" placeholder="Full name">
-            <input class="persona-edit-input" id="persona-role-input" value="US Nurse Immigration Expert" placeholder="Occupation" style="margin-top:6px">
-            <button class="persona-save-btn" onclick="savePersona()">Save</button>
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;flex-shrink:0;margin-left:12px">
-          <button class="card-edit-btn" id="about-edit-btn" onclick="toggleAboutEdit()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Edit
-          </button>
-        </div>
+    <!-- Identity + About -->
+    <div class="profile-section">
+      <div class="profile-section-header">
+        <span class="profile-section-title">Gizem Tanriseven</span>
+        <button class="card-edit-btn" id="about-edit-btn" onclick="toggleAboutEdit()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit
+        </button>
+      </div>
+      <div id="persona-view">
+        <div class="persona-name" id="persona-name-display">Gizem Tanriseven</div>
+        <div class="persona-role" id="persona-role-display">US Nurse Immigration Expert</div>
+      </div>
+      <div id="persona-edit" style="display:none">
+        <input class="persona-edit-input" id="persona-name-input" value="Gizem Tanriseven" placeholder="Full name">
+        <input class="persona-edit-input" id="persona-role-input" value="US Nurse Immigration Expert" placeholder="Occupation" style="margin-top:6px">
+        <button class="persona-save-btn" onclick="savePersona()">Save</button>
       </div>
       <div class="about-collapsible" id="about-collapsible">
         <div style="height:1px;background:rgba(91,142,240,0.15);margin:16px 0"></div>
@@ -1013,11 +1015,11 @@ body {
     </div>
 
     <!-- PersonAI Questions -->
-    <div class="card">
-      <div class="card-header-row">
+    <div class="profile-section">
+      <div class="profile-section-header">
         <div>
-          <div class="card-label" style="margin-bottom:2px">PersonAI Questions</div>
-          <div style="font-size:11px;color:var(--text3)">Answer questions to help your PersonAI sound more like you!</div>
+          <span class="profile-section-title">PersonAI Questions</span>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">Answer questions to help your PersonAI sound more like you!</div>
         </div>
         <button class="card-edit-btn" id="pq-toggle-btn" onclick="togglePQSection()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
@@ -1200,9 +1202,9 @@ body {
     </div>
 
     <!-- Training artifacts -->
-    <div class="card">
-      <div class="card-header-row">
-        <div class="card-label" style="margin-bottom:0">Training material</div>
+    <div class="profile-section">
+      <div class="profile-section-header">
+        <span class="profile-section-title">Training Material</span>
         <button class="add-artifact-btn" onclick="openArtifactDrawer()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Add Memory
