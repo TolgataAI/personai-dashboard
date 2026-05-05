@@ -1898,7 +1898,7 @@ function sendDetailMsg() {
   const msgs = document.getElementById('detail-messages');
   const d = document.createElement('div');
   d.className = 'msg msg-out';
-  d.innerHTML = `<div class="msg-bubble">${text}</div><div class="ai-approved-label" style="color:var(--accent)"><div class="ai-dot" style="background:var(--accent)"></div> Answered by You</div><div class="msg-time">Just now</div>`;
+  d.innerHTML = `<div class="msg-bubble" style="background:#10B981">${text}</div><div class="ai-approved-label"><div class="ai-dot" style="background:#10B981"></div> Answered</div><div class="msg-time">Just now</div>`;
   msgs.appendChild(d);
   msgs.scrollTop = msgs.scrollHeight;
   input.value = '';
@@ -1946,7 +1946,7 @@ function approveMsg(btn) {
   const msgs = document.getElementById('detail-messages');
   const d = document.createElement('div');
   d.className = 'msg msg-out';
-  d.innerHTML = `<div class="msg-bubble">${text}</div><div class="ai-approved-label" style="color:var(--accent)"><div class="ai-dot" style="background:var(--accent)"></div> Approved by you</div><div class="msg-time">Just now</div>`;
+  d.innerHTML = `<div class="msg-bubble" style="background:#10B981">${text}</div><div class="ai-approved-label"><div class="ai-dot" style="background:#10B981"></div> Answered</div><div class="msg-time">Just now</div>`;
   msgs.appendChild(d);
   msgs.scrollTop = msgs.scrollHeight;
   setInputLocked(true);
