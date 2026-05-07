@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Chat with Gizem</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F5F7FA;
+  --surface: #FFFFFF;
+  --surface2: #EEF1F6;
+  --surface3: #E4E8F0;
+  --border: rgba(0,0,0,0.08);
+  --accent: #5B8EF0;
+  --accent2: #8B5CF6;
+  --text: #0C0F14;
+  --text2: #505A6E;
+  --text3: #8892A4;
+  --font: 'Sora', sans-serif;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --safe-bottom: env(safe-area-inset-bottom, 16px);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body { background: var(--surface3); margin: 0; padding: 0; }
+
+#app {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── HEADER ── */
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.expert-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: white;
+  flex-shrink: 0;
+}
+
+.expert-info { flex: 1; min-width: 0; }
+.expert-name { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; }
+.expert-brand { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+.header-status {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--accent2); font-weight: 500;
+}
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent2);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ── MESSAGES ── */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.msg { display: flex; flex-direction: column; max-width: 78%; }
+.msg-in { align-self: flex-start; }
+.msg-out { align-self: flex-end; }
+
+.msg-bubble {
+  padding: 11px 14px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+.msg-in .msg-bubble {
+  background: var(--surface);
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+.msg-out .msg-bubble {
+  background: var(--accent);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.msg-time {
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 4px;
+}
+.msg-in .msg-time { align-self: flex-start; padding-left: 2px; }
+.msg-out .msg-time { align-self: flex-end; padding-right: 2px; }
+
+/* typing indicator */
+.typing-bubble {
+  display: flex; align-items: center; gap: 4px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-radius: 18px; border-bottom-left-radius: 4px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  width: fit-content;
+}
+.typing-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text3);
+  animation: typing-bounce 1.2s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing-bounce {
+  0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+
+/* day divider */
+.day-divider {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; color: var(--text3); font-weight: 500;
+}
+.day-divider::before, .day-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ── INPUT ── */
+.input-area {
+  flex-shrink: 0;
+  padding: 12px 16px calc(12px + var(--safe-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.chat-input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 10px 16px;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  resize: none;
+  min-height: 42px;
+  max-height: 120px;
+  line-height: 1.45;
+}
+.chat-input::placeholder { color: var(--text3); }
+.chat-input:disabled { opacity: 0.5; }
+
+.send-btn {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--accent);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(91,142,240,0.35);
+  transition: all 0.15s;
+}
+.send-btn:active { transform: scale(0.92); opacity: 0.9; }
+.send-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+.send-btn svg { width: 17px; height: 17px; stroke: white; fill: none; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div class="chat-header">
+    <div class="expert-avatar">G</div>
+    <div class="expert-info">
+      <div class="expert-name">Gizem Tanriseven</div>
+      <div class="expert-brand">US Nurse Immigration Expert</div>
+    </div>
+    <div class="header-status">
+      <div class="status-dot"></div>
+      Online
+    </div>
+  </div>
+
+  <!-- MESSAGES -->
+  <div class="messages" id="messages">
+    <div class="day-divider">Today</div>
+
+    <div class="msg msg-in">
+      <div class="msg-bubble">Merhaba! I'm Gizem's AI persona. I can answer your questions about becoming a nurse in the USA. How can I help you?</div>
+      <div class="msg-time">Just now</div>
+    </div>
+  </div>
+
+  <!-- INPUT -->
+  <div class="input-area">
+    <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask Gizem anything..."></textarea>
+    <button class="send-btn" id="send-btn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+
+</div>
+
+<script>
+const AI_REPLIES = [
+  "Texas and Florida are the most accessible states for foreign nurses. Texas doesn't require CGFNS certification and has a responsive board for international applicants.",
+  "The NCLEX-RN is required in all US states. You'll need to apply through a state board — I recommend starting with Texas or Florida as your first state.",
+  "The EB-3 visa is the most common path for nurse immigration. Your employer sponsors you and the process typically takes 18–36 months depending on your country of birth.",
+  "CGFNS certification evaluates your nursing education and credentials. It's required by most states and takes around 3–4 months to complete.",
+  "English proficiency tests accepted by most state boards include TOEFL iBT, IELTS Academic, and OET. I recommend checking your target state's specific requirements.",
+];
+
+let replyIndex = 0;
+let waiting = false;
+const input = document.getElementById('chat-input');
+const sendBtn = document.getElementById('send-btn');
+
+function setLocked(locked) {
+  input.disabled = locked;
+  sendBtn.disabled = locked;
+  input.placeholder = locked ? 'Waiting for reply...' : 'Ask Gizem anything...';
+}
+
+function now() {
+  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function scrollBottom() {
+  const msgs = document.getElementById('messages');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function sendMessage() {
+  const text = input.value.trim();
+  if (!text || waiting) return;
+
+  const msgs = document.getElementById('messages');
+
+  // user bubble
+  const userDiv = document.createElement('div');
+  userDiv.className = 'msg msg-out';
+  userDiv.innerHTML = `<div class="msg-bubble">${escapeHtml(text)}</div><div class="msg-time">${now()}</div>`;
+  msgs.appendChild(userDiv);
+  input.value = '';
+  input.style.height = 'auto';
+  setLocked(true);
+  waiting = true;
+  scrollBottom();
+
+  // typing indicator
+  const typingDiv = document.createElement('div');
+  typingDiv.id = 'typing';
+  typingDiv.className = 'msg msg-in';
+  typingDiv.innerHTML = `<div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+  msgs.appendChild(typingDiv);
+  scrollBottom();
+
+  setTimeout(() => {
+    document.getElementById('typing')?.remove();
+
+    const reply = AI_REPLIES[replyIndex % AI_REPLIES.length];
+    replyIndex++;
+
+    const aiDiv = document.createElement('div');
+    aiDiv.className = 'msg msg-in';
+    aiDiv.innerHTML = `<div class="msg-bubble">${reply}</div><div class="msg-time">${now()}</div>`;
+    msgs.appendChild(aiDiv);
+    scrollBottom();
+
+    setLocked(false);
+    waiting = false;
+  }, 1200 + Math.random() * 800);
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// auto-grow textarea
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+});
+
+// send on Enter (not Shift+Enter)
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+</script>
+</body>
+</html>
